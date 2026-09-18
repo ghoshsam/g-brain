@@ -1,0 +1,23 @@
+{
+  "name": "gbrain-mcp",
+  "version": "0.1.0",
+  "private": false,
+  "type": "module",
+  "description": "MCP server \u2014 stdio and streamable HTTP. The only network surface",
+  "main": "./dist/index.js",
+  "files": ["dist", "../../seed"],
+  "scripts": {
+    "build": "tsup src/index.ts --format esm --dts --clean",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@g-brain/core": "workspace:*",
+    "@g-brain/search": "workspace:^",
+    "@modelcontextprotocol/sdk": "^1.30.0",
+    "zod": "^4.6.5"
+  },
+  "license": "MIT",
+  "bin": {
+    "gbrain-mcp": "./dist/index.js"
+  }
+}

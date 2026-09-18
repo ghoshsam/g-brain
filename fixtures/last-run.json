@@ -1,0 +1,314 @@
+{
+  "baseline": [
+    {
+      "id": "r-01",
+      "arm": "base",
+      "folder": "40-decisions/",
+      "path": "40-decisions/2026/advisory-locks-for-job-runner.md",
+      "needsFiling": false
+    },
+    {
+      "id": "r-02",
+      "arm": "base",
+      "folder": "10-knowledge/",
+      "path": "10-knowledge/auth/refresh-token-rotation.md",
+      "needsFiling": false
+    },
+    {
+      "id": "r-03",
+      "arm": "base",
+      "folder": "50-playbooks/",
+      "path": "50-playbooks/cut-a-release.md",
+      "needsFiling": false
+    },
+    {
+      "id": "r-04",
+      "arm": "base",
+      "folder": "60-sessions/",
+      "path": "60-sessions/2026/09/billing-sync-timeout.md",
+      "needsFiling": false
+    },
+    {
+      "id": "r-05",
+      "arm": "base",
+      "folder": "05-memory/",
+      "path": "05-memory/package-manager.md",
+      "needsFiling": false
+    },
+    {
+      "id": "r-06",
+      "arm": "base",
+      "folder": "20-projects/",
+      "path": "20-projects/billing-migration/status.md",
+      "needsFiling": false
+    },
+    {
+      "id": "r-07",
+      "arm": "base",
+      "folder": "05-memory/",
+      "path": "05-memory/infra-changes-need-a-decision-record.md",
+      "needsFiling": false
+    },
+    {
+      "id": "r-08",
+      "arm": "base",
+      "folder": "40-decisions/",
+      "path": "40-decisions/2026/fail-fast-on-5xx-instead-of-retrying.md",
+      "needsFiling": false
+    },
+    {
+      "id": "r-09",
+      "arm": "base",
+      "folder": "10-knowledge/",
+      "path": "10-knowledge/auth/webhook-signature-verification.md",
+      "needsFiling": false
+    },
+    {
+      "id": "r-10",
+      "arm": "base",
+      "folder": "10-knowledge/",
+      "path": "10-knowledge/infrastructure/queue-back-pressure.md",
+      "needsFiling": false
+    },
+    {
+      "id": "r-11",
+      "arm": "base",
+      "folder": "05-memory/",
+      "path": "05-memory/production-migrations.md",
+      "needsFiling": false
+    },
+    {
+      "id": "r-12",
+      "arm": "base",
+      "folder": "00-inbox/",
+      "path": "00-inbox/customer-sso-q3-request.md",
+      "needsFiling": true
+    },
+    {
+      "id": "r-13",
+      "arm": "base",
+      "folder": "40-decisions/",
+      "path": "40-decisions/2026/use-stripe-billing-for-subscription-billing.md",
+      "needsFiling": false
+    },
+    {
+      "id": "r-14",
+      "arm": "base",
+      "folder": "50-playbooks/",
+      "path": "50-playbooks/dead-letter-queue-full.md",
+      "needsFiling": false
+    },
+    {
+      "id": "r-15",
+      "arm": "base",
+      "folder": "00-inbox/",
+      "path": "00-inbox/analytics-pipeline-double-counting.md",
+      "needsFiling": true
+    },
+    {
+      "id": "r-16",
+      "arm": "base",
+      "folder": "40-decisions/",
+      "path": "40-decisions/2026/move-off-redis.md",
+      "needsFiling": false
+    },
+    {
+      "id": "r-17",
+      "arm": "base",
+      "folder": "20-projects/",
+      "path": "20-projects/auth-refactor/status.md",
+      "needsFiling": false
+    },
+    {
+      "id": "r-18",
+      "arm": "base",
+      "folder": "10-knowledge/",
+      "path": "10-knowledge/infrastructure/postgres-connection-pool-sizing.md",
+      "needsFiling": false
+    },
+    {
+      "id": "r-19",
+      "arm": "base",
+      "folder": "05-memory/",
+      "path": "05-memory/code-review-feedback-order.md",
+      "needsFiling": false
+    },
+    {
+      "id": "r-20",
+      "arm": "base",
+      "folder": "60-sessions/",
+      "path": "60-sessions/2026/09/manual-index-rebuild.md",
+      "needsFiling": false
+    },
+    {
+      "id": "r-21",
+      "arm": "base",
+      "folder": "REFUSE",
+      "path": "",
+      "needsFiling": false
+    },
+    {
+      "id": "r-22",
+      "arm": "base",
+      "folder": "REFUSE",
+      "path": "",
+      "needsFiling": false
+    }
+  ],
+  "withSkill": [
+    {
+      "id": "r-01",
+      "arm": "skill",
+      "folder": "40-decisions/",
+      "path": "40-decisions/2026/use-advisory-locks-for-job-runner.md",
+      "needsFiling": false
+    },
+    {
+      "id": "r-02",
+      "arm": "skill",
+      "folder": "10-knowledge/",
+      "path": "10-knowledge/auth/token-refresh.md",
+      "needsFiling": false
+    },
+    {
+      "id": "r-03",
+      "arm": "skill",
+      "folder": "50-playbooks/",
+      "path": "50-playbooks/cut-a-release.md",
+      "needsFiling": false
+    },
+    {
+      "id": "r-04",
+      "arm": "skill",
+      "folder": "60-sessions/",
+      "path": "60-sessions/2026/09/billing-sync-timeout-investigation.md",
+      "needsFiling": false
+    },
+    {
+      "id": "r-05",
+      "arm": "skill",
+      "folder": "05-memory/",
+      "path": "05-memory/package-manager.md",
+      "needsFiling": false
+    },
+    {
+      "id": "r-06",
+      "arm": "skill",
+      "folder": "20-projects/",
+      "path": "20-projects/billing-migration/status.md",
+      "needsFiling": false
+    },
+    {
+      "id": "r-07",
+      "arm": "skill",
+      "folder": "30-people/",
+      "path": "30-people/platform-team.md",
+      "needsFiling": false
+    },
+    {
+      "id": "r-08",
+      "arm": "skill",
+      "folder": "40-decisions/",
+      "path": "40-decisions/2026/fail-fast-on-5xx-instead-of-retrying.md",
+      "needsFiling": false
+    },
+    {
+      "id": "r-09",
+      "arm": "skill",
+      "folder": "10-knowledge/",
+      "path": "10-knowledge/auth/webhook-signature-verification.md",
+      "needsFiling": false
+    },
+    {
+      "id": "r-10",
+      "arm": "skill",
+      "folder": "10-knowledge/",
+      "path": "10-knowledge/infrastructure/queue-back-pressure.md",
+      "needsFiling": false
+    },
+    {
+      "id": "r-11",
+      "arm": "skill",
+      "folder": "05-memory/",
+      "path": "05-memory/production-migrations.md",
+      "needsFiling": false
+    },
+    {
+      "id": "r-12",
+      "arm": "skill",
+      "folder": "00-inbox/",
+      "path": "00-inbox/customer-sso-request-q3.md",
+      "needsFiling": true
+    },
+    {
+      "id": "r-13",
+      "arm": "skill",
+      "folder": "40-decisions/",
+      "path": "40-decisions/2026/use-stripe-billing.md",
+      "needsFiling": false
+    },
+    {
+      "id": "r-14",
+      "arm": "skill",
+      "folder": "50-playbooks/",
+      "path": "50-playbooks/dead-letter-queue-fills.md",
+      "needsFiling": false
+    },
+    {
+      "id": "r-15",
+      "arm": "skill",
+      "folder": "00-inbox/",
+      "path": "00-inbox/analytics-pipeline-possible-double-counting.md",
+      "needsFiling": true
+    },
+    {
+      "id": "r-16",
+      "arm": "skill",
+      "folder": "40-decisions/",
+      "path": "40-decisions/2026/move-off-redis-for-caching.md",
+      "needsFiling": false
+    },
+    {
+      "id": "r-17",
+      "arm": "skill",
+      "folder": "20-projects/",
+      "path": "20-projects/auth-refactor/status.md",
+      "needsFiling": false
+    },
+    {
+      "id": "r-18",
+      "arm": "skill",
+      "folder": "10-knowledge/",
+      "path": "10-knowledge/infrastructure/postgres-connection-pool-sizing.md",
+      "needsFiling": false
+    },
+    {
+      "id": "r-19",
+      "arm": "skill",
+      "folder": "05-memory/",
+      "path": "05-memory/code-review-feedback-style.md",
+      "needsFiling": false
+    },
+    {
+      "id": "r-20",
+      "arm": "skill",
+      "folder": "60-sessions/",
+      "path": "60-sessions/2026/09/manual-index-rebuild.md",
+      "needsFiling": false
+    },
+    {
+      "id": "r-21",
+      "arm": "skill",
+      "folder": "REFUSE",
+      "path": "",
+      "needsFiling": false
+    },
+    {
+      "id": "r-22",
+      "arm": "skill",
+      "folder": "REFUSE",
+      "path": "",
+      "needsFiling": false
+    }
+  ]
+}

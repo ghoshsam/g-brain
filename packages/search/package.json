@@ -1,0 +1,27 @@
+{
+  "name": "@g-brain/search",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "description": "Lexical BM25 search over a derived, disposable index",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
+    }
+  },
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "files": ["dist"],
+  "scripts": {
+    "build": "tsup src/index.ts --format esm --dts --clean",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@g-brain/core": "workspace:^",
+    "@orama/orama": "^3.1.18",
+    "chokidar": "^5.0.0",
+    "fast-glob": "^3.3.3",
+    "gray-matter": "^4.0.3"
+  }
+}

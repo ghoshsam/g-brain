@@ -1,0 +1,12 @@
+{
+  "name": "@g-brain/skills",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "description": "Agent skills. An accelerant, never a requirement — see ADR-0006",
+  "files": ["skills"],
+  "scripts": {
+    "build": "echo \"no build\"",
+    "typecheck": "echo \"no types\""
+  }
+}

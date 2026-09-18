@@ -1,0 +1,23 @@
+{
+  "name": "gbrain",
+  "version": "0.1.0",
+  "private": false,
+  "type": "module",
+  "description": "gbrain \u2014 init, doctor, index, serve",
+  "bin": {
+    "gbrain": "./dist/index.js"
+  },
+  "main": "./dist/index.js",
+  "files": ["dist", "../../seed"],
+  "scripts": {
+    "build": "tsup src/index.ts --format esm --dts --clean",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@g-brain/core": "workspace:*",
+    "@g-brain/search": "workspace:^",
+    "commander": "^15.0.0",
+    "picocolors": "^1.1.1"
+  },
+  "license": "MIT"
+}

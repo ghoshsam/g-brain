@@ -1,0 +1,30 @@
+{
+  "name": "@g-brain/core",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "description": "All behaviour: structure, store, guards, auth, links, git, audit",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
+    }
+  },
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "files": ["dist"],
+  "scripts": {
+    "build": "tsup src/index.ts --format esm --dts --clean",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "fast-glob": "^3.3.3",
+    "gray-matter": "^4.0.3",
+    "proper-lockfile": "^4.1.2",
+    "simple-git": "^3.36.0",
+    "zod": "^4.6.5"
+  },
+  "devDependencies": {
+    "@types/proper-lockfile": "^4.1.4"
+  }
+}
