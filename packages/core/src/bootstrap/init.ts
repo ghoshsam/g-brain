@@ -114,7 +114,7 @@ export function mcpSnippet(root: string): string {
       mcpServers: {
         'g-brain': {
           command: 'npx',
-          args: ['-y', 'gbrain-mcp'],
+          args: ['-y', 'g-brain-mcp'],
           env: { BRAIN_ROOT: root.replace(/\\/g, '/') },
         },
       },

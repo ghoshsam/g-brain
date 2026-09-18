@@ -49,14 +49,14 @@ Anywhere outside a code project is fine. `/srv/brain` is just a habit.
 
 ### Step 2: Start the server so it listens on the network
 
-The server is the `gbrain-mcp` package. Tell it to listen on HTTP and start it:
+The server is the `g-brain-mcp` package. Tell it to listen on HTTP and start it:
 
 ```bash
 BRAIN_ROOT=/srv/brain \
 MCP_TRANSPORT=http \
 MCP_HTTP_PORT=8787 \
 GIT_AUTOCOMMIT=true \
-npx -y gbrain-mcp
+npx -y g-brain-mcp
 ```
 
 ```

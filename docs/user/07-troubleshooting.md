@@ -54,7 +54,7 @@ If that file is not there, your brain is somewhere else, or it was never made.
 **Step 4: Check the server starts on its own.**
 
 ```bash
-BRAIN_ROOT=~/brain npx -y gbrain-mcp
+BRAIN_ROOT=~/brain npx -y g-brain-mcp
 ```
 
 It should sit there quietly and wait. If you get an error here, that is the real
@@ -89,7 +89,7 @@ pushed to a repository whose readers never asked for them.
 **Fix.** Put the brain outside every code project.
 
 ```bash
-npx gbrain init ~/brain
+npx g-brain init ~/brain
 ```
 
 One brain serves every project you work on. See
@@ -401,7 +401,7 @@ The error messages here name the path and the fix.
 **2. Your versions.**
 
 ```bash
-npx gbrain --version
+npx g-brain --version
 node --version
 git --version
 ```

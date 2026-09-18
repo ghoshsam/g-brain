@@ -1,9 +1,9 @@
 {
-  "name": "gbrain-mcp",
+  "name": "g-brain-mcp",
   "version": "0.1.0",
   "private": false,
   "type": "module",
-  "description": "MCP server \u2014 stdio and streamable HTTP. The only network surface",
+  "description": "MCP server — stdio and streamable HTTP. The only network surface",
   "main": "./dist/index.js",
   "files": ["dist", "../../seed"],
   "scripts": {
@@ -18,6 +18,6 @@
   },
   "license": "MIT",
   "bin": {
-    "gbrain-mcp": "./dist/index.js"
+    "g-brain-mcp": "./dist/index.js"
   }
 }

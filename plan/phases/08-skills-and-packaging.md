@@ -79,12 +79,12 @@ commit.
 
 ## Packaging
 
-- **npm** — `gbrain` with a `bin`, so `npx gbrain init` works with nothing
+- **npm** — `gbrain` with a `bin`, so `npx g-brain init` works with nothing
   installed.
 - **Docker** — Node 20 slim, `git` present in the image (`simple-git` shells out
   to it), `BRAIN_ROOT` a mounted volume, HTTP transport by default. **The image
   must never bake a brain into itself.**
-- **`README.md`** — what it is, `npx gbrain init`, the MCP registration snippet,
+- **`README.md`** — what it is, `npx g-brain init`, the MCP registration snippet,
   and a link to the structure-doc guide, because that is the document a new user
   most needs.
 
@@ -96,7 +96,7 @@ commit.
 - [x] The bar is met on `default.md`: ≥90% correct folder, zero silent misfiles.
 - [x] Findings are written back into the guide and the presets, and the run is
       repeated after tuning.
-- [x] `npx gbrain init` works from a clean machine with no checkout.
+- [x] `npx g-brain init` works from a clean machine with no checkout.
 - [x] The Docker image starts, serves MCP over HTTP, and passes `GET /health`
       against a mounted brain.
 - [x] `.env.example` matches

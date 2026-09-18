@@ -14,7 +14,7 @@ failures are real.
 ## Install and first run
 
 ```bash
-npx gbrain init ~/brain
+npx g-brain init ~/brain
 ```
 
 Nothing to install first beyond Node ≥ 20 and `git`. `init` is interactive by

@@ -115,7 +115,7 @@ in the [MCP reference](./05-mcp-reference.md).
 
 ## Packaging
 
-- **npm package** — `gbrain` with a `bin`, so `npx gbrain init` works with
+- **npm package** — `gbrain` with a `bin`, so `npx g-brain init` works with
   nothing installed.
 - **Docker image** — Node 20 slim, `git` present in the image (`simple-git`
   shells out to it), `BRAIN_ROOT` mounted as a volume, HTTP transport by

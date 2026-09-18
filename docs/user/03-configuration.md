@@ -27,7 +27,7 @@ place, because your AI tool is what starts the server:
   "mcpServers": {
     "g-brain": {
       "command": "npx",
-      "args": ["-y", "gbrain-mcp"],
+      "args": ["-y", "g-brain-mcp"],
       "env": {
         "BRAIN_ROOT": "/home/you/brain",
         "GIT_AUTOCOMMIT": "true"
@@ -218,7 +218,7 @@ things changed:
   "mcpServers": {
     "g-brain": {
       "command": "npx",
-      "args": ["-y", "gbrain-mcp"],
+      "args": ["-y", "g-brain-mcp"],
       "env": {
         "BRAIN_ROOT": "/home/you/work-notes/brain",
         "GIT_AUTOCOMMIT": "true",

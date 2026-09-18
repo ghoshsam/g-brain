@@ -12,7 +12,7 @@ updated: 2026-09-18
 2. `pnpm changeset version` and check the generated changelog.
 3. Commit as `release: vX.Y.Z`.
 4. Tag and push the tag.
-5. Confirm the published package installs: `npx gbrain@X.Y.Z --version`.
+5. Confirm the published package installs: `npx g-brain@X.Y.Z --version`.
 
 **Done when** the tag exists, the package installs, and the changelog is right.
 

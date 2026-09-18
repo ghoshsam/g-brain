@@ -10,6 +10,11 @@ You will not have to tell it which folder to use.
 
 **Before you start.** You need Node.js version 20 or newer, and git.
 
+> **g-brain is not on npm yet.** Until it is, build it from source first — it
+> takes two commands. See [from source](./02-installation.md#0-from-source),
+> then come back here. Everywhere this page says `npx g-brain`, run
+> `node apps/cli/dist/index.js` instead.
+
 ---
 
 ## Step 1: Make a brain
@@ -17,7 +22,7 @@ You will not have to tell it which folder to use.
 Run this:
 
 ```bash
-npx gbrain init ~/brain
+npx g-brain init ~/brain
 ```
 
 You will see this:
@@ -35,7 +40,7 @@ Connect an agent — add this to your MCP client:
   "mcpServers": {
     "g-brain": {
       "command": "npx",
-      "args": ["-y", "gbrain-mcp"],
+      "args": ["-y", "g-brain-mcp"],
       "env": { "BRAIN_ROOT": "/home/you/brain" }
     }
   }

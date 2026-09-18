@@ -1,10 +1,11 @@
 {
-  "name": "gbrain",
+  "name": "g-brain",
   "version": "0.1.0",
   "private": false,
   "type": "module",
-  "description": "gbrain \u2014 init, doctor, index, serve",
+  "description": "gbrain — init, doctor, index, serve",
   "bin": {
+    "g-brain": "./dist/index.js",
     "gbrain": "./dist/index.js"
   },
   "main": "./dist/index.js",

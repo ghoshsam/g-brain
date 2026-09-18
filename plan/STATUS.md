@@ -212,7 +212,7 @@ re-running that fixture now passes. Full write-up in
 
 Also shipped: four skills (`brain-capture`, `brain-recall`, `brain-curate`,
 `brain-onboard`), the Dockerfile, the repo README, and npm packaging as
-`gbrain` and `gbrain-mcp`.
+`gbrain` and `g-brain-mcp`.
 
 ## The HTTP transport — phase 4 closed
 
@@ -244,7 +244,7 @@ Found because vitest reported `EPERM` after every test passed.
 
 - Running the routing fixtures **with a skill loaded**, to confirm the gap
   against the no-skill baseline is small (FR-30).
-- Publishing: `gbrain` and `gbrain-mcp` are packaged but unpublished.
+- Publishing: `gbrain` and `g-brain-mcp` are packaged but unpublished.
 
 ## Constraints that hold throughout
 

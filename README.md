@@ -8,11 +8,16 @@ learned on Friday. g-brain gives them one place to put things, and one document
 that says where things go.
 
 ```bash
-npx gbrain init ~/brain
+git clone https://github.com/ghoshsam/g-brain.git
+cd g-brain && pnpm install && pnpm build
+node apps/cli/dist/index.js init ~/brain
 ```
 
 Then paste the printed snippet into any MCP client and ask it to remember
 something — **without naming a folder**.
+
+> Not on npm yet, so build it from source. Once published it will be
+> `npx g-brain init ~/brain`.
 
 ## The idea
 

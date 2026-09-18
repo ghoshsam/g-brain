@@ -29,7 +29,7 @@ on one file shows that note's whole life. Push the repository somewhere private
 and that is your backup. There is no export step, because there is nothing to
 export.
 
-If git is missing, `npx gbrain init` still makes the folder and the files. It
+If git is missing, `npx g-brain init` still makes the folder and the files. It
 prints `git repository  no (git not found)`. You then have no history, no undo
 and no backup. Install git, run `git init` in the folder, and you get them back.
 
@@ -39,9 +39,86 @@ and no backup. Install git, run `git init` in the folder, and you get them back.
 
 | Way | Good for | What it costs |
 |---|---|---|
-| `npx` — nothing installed | Almost everyone, and every desktop AI tool | A second or two on the first run. Needs the internet |
+| **From source** | Right now, while the packages are unpublished. Also for changing the code | You build it once |
+| `npx` — nothing installed | Almost everyone, once it is published | A second or two on the first run. Needs the internet |
 | Global install | Heavy command line use, machines with no internet, a fixed version | You do the upgrades yourself |
 | Docker | Servers, a brain shared over the network, CI | You look after a container |
+
+> **Read this first.** g-brain is not on npm yet. Until it is, **install from
+> source** — the other three sections describe how it will work once the
+> packages are published.
+
+---
+
+## 0. From source
+
+g-brain is open source. You can clone it and run it without waiting for
+anything.
+
+### Step 1: Get the code and build it
+
+```bash
+git clone https://github.com/ghoshsam/g-brain.git
+cd g-brain
+pnpm install
+pnpm build
+```
+
+No pnpm? `npm install -g pnpm` first.
+
+### Step 2: Make a brain
+
+```bash
+node apps/cli/dist/index.js init ~/brain
+```
+
+### Step 3: Connect your AI tool
+
+Use the full path to the server you just built, instead of `npx`:
+
+```json
+{
+  "mcpServers": {
+    "g-brain": {
+      "command": "node",
+      "args": ["/full/path/to/g-brain/apps/mcp/dist/index.js"],
+      "env": { "BRAIN_ROOT": "/home/you/brain" }
+    }
+  }
+}
+```
+
+Use the real path on your machine. On Windows use forward slashes:
+`C:/Users/you/g-brain/apps/mcp/dist/index.js`.
+
+That is it. This is exactly what the published package does — `npx` only saves
+you typing the path.
+
+### Optional: get the short `gbrain` command
+
+Typing `node apps/cli/dist/index.js` every time gets old:
+
+```bash
+cd apps/cli && npm link
+cd ../mcp && npm link
+```
+
+Now `gbrain doctor` works from any folder. To undo it:
+
+```bash
+npm uninstall -g g-brain g-brain-mcp
+```
+
+### Keeping up to date
+
+```bash
+cd g-brain
+git pull
+pnpm install
+pnpm build
+```
+
+Your brain is a separate folder, so it is untouched by this.
 
 ---
 
@@ -50,7 +127,7 @@ and no backup. Install git, run `git init` in the folder, and you get them back.
 This is the one to pick.
 
 ```bash
-npx gbrain init ~/brain
+npx g-brain init ~/brain
 ```
 
 npm downloads the package, runs it, and keeps a copy. Nothing is installed for
@@ -62,7 +139,7 @@ good. Your AI tool does the same thing for the server. That is why the text
   "mcpServers": {
     "g-brain": {
       "command": "npx",
-      "args": ["-y", "gbrain-mcp"],
+      "args": ["-y", "g-brain-mcp"],
       "env": { "BRAIN_ROOT": "/home/you/brain" }
     }
   }
@@ -74,7 +151,7 @@ There are two packages:
 | Package | What it is |
 |---|---|
 | `gbrain` | The command you type yourself — `init`, `doctor`, `search` |
-| `gbrain-mcp` | The server your AI tool talks to. You rarely run this by hand |
+| `g-brain-mcp` | The server your AI tool talks to. You rarely run this by hand |
 
 The cost: `npx` asks npm for a newer version each time it starts. So the first
 run of the day is slower. And a machine with no internet cannot start the
@@ -83,7 +160,7 @@ server unless npm already has a copy saved.
 ## 2. Global install
 
 ```bash
-npm install -g gbrain gbrain-mcp
+npm install -g g-brain g-brain-mcp
 ```
 
 Both commands are now on your `PATH`. They start instantly and work with no
@@ -95,7 +172,7 @@ Point your AI tool at the installed command instead of `npx`:
 {
   "mcpServers": {
     "g-brain": {
-      "command": "gbrain-mcp",
+      "command": "g-brain-mcp",
       "env": { "BRAIN_ROOT": "/home/you/brain" }
     }
   }
@@ -181,7 +258,7 @@ Restart the tool afterwards. Most of them read that file once, at startup.
 Add it from the command line:
 
 ```bash
-claude mcp add g-brain --env BRAIN_ROOT=/home/you/brain -- npx -y gbrain-mcp
+claude mcp add g-brain --env BRAIN_ROOT=/home/you/brain -- npx -y g-brain-mcp
 ```
 
 Or open `~/.claude/settings.json` and paste in the `mcpServers` block.
@@ -196,7 +273,7 @@ every project:
   "mcpServers": {
     "g-brain": {
       "command": "npx",
-      "args": ["-y", "gbrain-mcp"],
+      "args": ["-y", "g-brain-mcp"],
       "env": { "BRAIN_ROOT": "/home/you/brain" }
     }
   }
@@ -216,7 +293,7 @@ and `BRAIN_ROOT`:
   "mcpServers": {
     "g-brain": {
       "command": "npx",
-      "args": ["-y", "gbrain-mcp"],
+      "args": ["-y", "g-brain-mcp"],
       "env": {
         "BRAIN_ROOT": "/home/you/brain",
         "GIT_AUTOCOMMIT": "true"
@@ -249,7 +326,7 @@ gbrain --version
 0.1.0
 ```
 
-If you went the `npx` route, type `npx gbrain --version` instead.
+If you went the `npx` route, type `npx g-brain --version` instead.
 
 **Check 2: the brain is healthy.**
 
@@ -313,7 +390,7 @@ the one it reads. [Troubleshooting](./07-troubleshooting.md) has the rest.
 | How you installed it | How to upgrade |
 |---|---|
 | `npx` | Nothing to do. It fetches the current version every time |
-| Global install | `npm install -g gbrain@latest gbrain-mcp@latest` |
+| Global install | `npm install -g g-brain@latest g-brain-mcp@latest` |
 | Docker | Rebuild the image and start a new container. Your notes live on your own machine, so they are untouched |
 
 An upgrade never changes your notes. The files on disk are the same files
@@ -331,7 +408,7 @@ git add -A && git commit -m "before upgrade"
 Remove the packages:
 
 ```bash
-npm uninstall -g gbrain gbrain-mcp
+npm uninstall -g g-brain g-brain-mcp
 ```
 
 Then delete the `g-brain` entry from your AI tool's settings and restart it.

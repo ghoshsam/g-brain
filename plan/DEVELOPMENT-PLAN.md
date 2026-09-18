@@ -73,7 +73,7 @@ Each phase has its own file in [`plan/phases/`](./phases/) with the full detail.
 | 5 | `apps/cli` — `gbrain init` and `doctor` | A new user gets a working brain in five minutes |
 | 6 | Git history and the audit log | Every change has a commit you can undo |
 | 7 | Search | You can find a note you wrote last week |
-| 8 | Skills, Docker, publishing | `npx gbrain` works on a clean machine |
+| 8 | Skills, Docker, publishing | `npx g-brain` works on a clean machine |
 
 ### The milestone that matters
 

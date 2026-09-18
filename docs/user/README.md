@@ -17,12 +17,16 @@ and picks a folder itself. You never tell it where.
 
 **Want to try it now?**
 
+g-brain is open source and not yet on npm, so build it from source:
+
 ```bash
-npx gbrain init ~/brain
+git clone https://github.com/ghoshsam/g-brain.git
+cd g-brain && pnpm install && pnpm build
+node apps/cli/dist/index.js init ~/brain
 ```
 
 Then paste the text it prints into your AI tool, and ask it to remember
-something.
+something. Full steps in [getting started](./01-getting-started.md).
 
 ---
 

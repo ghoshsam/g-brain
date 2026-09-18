@@ -16,7 +16,7 @@
     "lint:fix": "biome check --write .",
     "typecheck": "turbo run typecheck",
     "verify": "pnpm lint && pnpm typecheck && pnpm test && pnpm build",
-    "gbrain": "pnpm --filter @g-brain/cli exec gbrain",
+    "gbrain": "pnpm --filter g-brain exec gbrain",
     "test:coverage": "vitest run --coverage",
     "fixtures:score": "node fixtures/score.mjs"
   },

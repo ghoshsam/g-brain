@@ -39,10 +39,10 @@ describe('the user manual matches the software', () => {
       // flag, and commander owns those.
       [...manualText.matchAll(/\bgbrain ([a-z][a-z-]*)/g)].map((match) => match[1] ?? ''),
     )
-    // "npx gbrain init" and "npm install -g gbrain gbrain-mcp" both look like a
+    // "npx g-brain init" and "npm install -g g-brain g-brain-mcp" both look like a
     // subcommand to a plain regex. Neither is one.
     mentioned.delete('gbrain')
-    mentioned.delete('gbrain-mcp')
+    mentioned.delete('g-brain-mcp')
 
     for (const command of mentioned) {
       expect(realCommands, `the manual mentions "gbrain ${command}"`).toContain(command)
@@ -98,6 +98,27 @@ describe('the user manual matches the software', () => {
       [...manualText.matchAll(/(?<![#\w])(brain_[a-z_]+)\b/g)].map((match) => match[1] ?? ''),
     )) {
       expect(realTools, `the manual mentions a tool called ${mentioned}`).toContain(mentioned)
+    }
+  })
+
+  it('tells people to install the packages we actually publish', () => {
+    // A wrong name here sends readers to somebody else's package. 'gbrain' on
+    // npm is an unrelated machine-learning library, which is how this was found.
+    const published = ['apps/cli', 'apps/mcp'].map(
+      (dir) =>
+        (JSON.parse(readFileSync(join(ROOT, dir, 'package.json'), 'utf8')) as { name: string })
+          .name,
+    )
+
+    // Tools we tell people to install that are not ours.
+    const thirdParty = new Set(['pnpm', 'npm'])
+
+    for (const install of [
+      ...manualText.matchAll(/(?:npx(?: -y)?|npm install -g) ([a-z@][\w@/.-]*)/g),
+    ]) {
+      const name = (install[1] ?? '').replace(/@[\w.-]+$/, '')
+      if (thirdParty.has(name)) continue
+      expect(published, `the manual says to install "${name}"`).toContain(name)
     }
   })
 
