@@ -19,7 +19,7 @@ Ranked by likelihood × irreversibility:
 | 1 | **A secret is captured and committed** to a repo several people clone and a remote holds | Agents paste logs, config, and stack traces into captures without reading them. Once it is in a commit on a shared remote, the credential is leaked and rotation is the only remedy | Pattern scan before anything touches disk → `UNSAFE_CONTENT` | **Real.** A pattern scanner misses novel and obfuscated formats |
 | 2 | **Brain content is treated as instructions** by the agent that reads it | Every document was written by another agent or a person, and agents read documents into their own context. Likelihood is high | Convention, tool descriptions, shipped skills | **High.** The weakest control in the system, by a distance |
 | 3 | **A path escapes the brain root** and writes somewhere it must not | An agent constructing a path from a filename it read, or a deliberately hostile one | Resolve, normalise, contain → `INVALID_PATH`, before any filesystem call | Low. This one is genuinely closed |
-| 4 | **An agent reads content a team member should not have given it** | Scopes are per folder, so a key with read on `20-projects/` reads every project | Per-folder read scopes in `core/auth` → `FORBIDDEN` | **Coarse.** No per-document ACLs — see [what is not protected](#what-is-deliberately-not-protected) |
+| 4 | **An agent reads content a team member should not have given it** | Scopes are per folder, so a key with read on `20-projects/` reads every project under it. Narrowing that key to one project folder is the remedy, and it is a per-key act somebody has to perform | Per-folder read scopes in `core/auth` → `FORBIDDEN`, with the project folder as the boundary ([project scoping](#project-scoping)) | **Coarse, and now per project rather than per brain.** Still no per-document ACLs — see [what is not protected](#what-is-deliberately-not-protected) |
 | 5 | **A runaway agent fills the disk** | A loop writing the same 200 kB document a thousand times | `MAX_DOC_BYTES` → `TOO_LARGE`; per-key rate limit → `RATE_LIMITED` | Bounded, not eliminated. The repo still grows |
 
 Threats 1, 3, 4 and 5 have mechanical defences described below. Threat 2 does
@@ -208,6 +208,71 @@ authorise(ctx: BrainContext, action: 'read' | 'write', rel: string): Result<void
 - **`.brain/` is in the brain repo's `.gitignore`**, written by `gbrain init`.
   Key hashes and the audit log must not travel to the remote with the content.
 
+### Project scoping
+
+**A project is the folder `20-projects/{project}/`, and that folder is the
+access boundary**
+([ADR-0008](./12-adr/0008-project-scope-is-the-project-folder.md)). There is no
+project authorisation mechanism to describe, because there is none: a scope on
+`20-projects/billing` is an ordinary folder scope. It matches on whole path
+segments, so it covers `20-projects/billing/**` and does not leak into
+`20-projects/billing-platform`. Tools take a `project` code where they take a
+folder and it resolves to that path — sugar over `folder`, not a second
+addressing scheme
+([MCP reference](./05-mcp-reference.md#the-project-argument)).
+
+Listing projects is listing directories under `20-projects/`, filtered by the
+caller's read scopes, so the project list and the access rules cannot disagree:
+they are the same fact.
+
+#### Authorisation depends only on inputs the caller cannot author
+
+This is the rule the design rests on, and the one most likely to be broken later
+by someone adding a convenience. **The path is such an input. The document body
+is not.**
+
+The `project:` frontmatter field is the obvious thing to scope on, since it is
+already what groups content across folders. It keeps that job for search and
+filtering, and it is **never** an input to an authorisation decision. Two
+reasons, either one sufficient:
+
+- **It would be a privilege-escalation hole.** Frontmatter is linted, never
+  enforced ([ADR-0002](./12-adr/0002-safety-only-write-guards.md)), so any agent
+  can write `project: finance` into a body. A check that reads that field lets
+  an agent grant itself access by writing a file, and lets it hide a document
+  from a legitimate reader by mislabelling it.
+- **It would invert the write path.** Authorisation is step 2 and frontmatter
+  parsing is step 7
+  ([architecture](./01-architecture.md#request-path-for-a-write)), so the check
+  would have to parse agent-supplied content before deciding whether the agent
+  may submit it.
+
+What follows from that is a filing rule rather than a code rule.
+`10-knowledge/` and `40-decisions/` stay team-wide, as the
+[content model](../functional/05-content-model.md) intends, and **content that
+must not cross a project boundary lives in the project folder.** Promoting a
+finding out of a project folder into `10-knowledge/` also widens who can read
+it, which is a curation decision somebody has to make knowingly rather than a
+guard that will catch them.
+
+### The web UI carries a key, not a person
+
+The read-only web UI ([ADR-0009](./12-adr/0009-read-only-web-ui.md)) adds no
+authorisation surface. It is a caller like `apps/mcp` and `apps/cli`: it carries
+the local actor where `AUTH_REQUIRED` is `false`, or a bearer key over HTTP, and
+`authorise` evaluates it against the same folder scopes. A read-everywhere,
+write-nowhere recall key is the shape it wants. A project the caller cannot read
+is **absent from the list, not shown disabled** — naming a folder a caller
+cannot see leaks the shape of the brain, which is the same reason `FORBIDDEN`
+does not confirm a path exists.
+
+What it does not add is a user. There is still no identity system, so **the
+audit log names a key and not a person.** Two people sharing a key are
+indistinguishable in `audit.jsonl`, revoking one person's access means rotating
+a key others may hold, and giving one person access to one project means issuing
+and distributing a key scoped to that folder by hand. That is the accepted cost
+of not building identity, and it is the one most likely to be felt first.
+
 ### `UNAUTHORIZED` versus `FORBIDDEN`
 
 | | Meaning | Example |
@@ -325,10 +390,20 @@ determined attacker, and their limits are structural:
 
 Listed so nobody deploys g-brain believing otherwise.
 
-**No per-document access control.** Scopes are folder prefixes. A key that can
-read `20-projects/` reads every project in it. If two groups must not see each
-other's content, run two brains — they are two directories and two git repos,
-which is cheaper than an ACL model would be.
+**No per-document access control.** Scopes are folder prefixes, and the finest
+boundary available is a folder — a project folder, in practice
+([project scoping](#project-scoping)). A key that can read `20-projects/` reads
+every project in it, and a reader who legitimately needs one document from
+another project has no way to get it without widening the whole folder. Where
+two groups share nothing at all, two brains are still the better answer — they
+are two directories and two git repos, which is cheaper than an ACL model would
+be.
+
+**No user identity.** An actor is a key. Nothing in the system knows which
+person is holding one, the web UI included, so access is granted per key,
+attributed per key in `audit.jsonl`, and revoked by rotating a key
+([ADR-0009](./12-adr/0009-read-only-web-ui.md)). Adding OIDC later changes only
+how an `Actor` is resolved, not the authorisation model — but it is not built.
 
 **No encryption at rest.** The brain is a git repo of plain markdown, and
 [FR-27](../functional/06-functional-requirements.md#fr-27--human-readable-without-any-g-brain-surface-p0)
@@ -388,7 +463,8 @@ Before a brain holds anything that matters:
    front of it — bearer keys over plain HTTP are keys in the clear.
 6. **Scopes are narrowed per key.** One key per agent, write scope limited to
    the folders that agent actually captures into. Read-only where reading is all
-   it does.
+   it does. Where a project must not be readable across the team, the read scope
+   is `20-projects/{project}/` and not `20-projects/`.
 7. **`gbrain init`'s printed key was stored in a password manager**, not in a
    repo, a shell history, or a chat.
 8. **Someone reads `audit.jsonl` periodically** — for `UNSAFE_CONTENT`
@@ -402,6 +478,8 @@ Before a brain holds anything that matters:
 
 - [Architecture](./01-architecture.md) — the write path these guards sit on
 - [ADR-0002 — Safety-only write guards](./12-adr/0002-safety-only-write-guards.md) — why this list of rejections and no other
+- [ADR-0008 — A project is a folder](./12-adr/0008-project-scope-is-the-project-folder.md) — why authorisation never reads frontmatter
+- [ADR-0009 — A read-only web UI](./12-adr/0009-read-only-web-ui.md) — why there is no user identity
 - [Git and audit](./07-git-and-audit.md) — the audit line format and what git records
 - [Operations](./09-operations.md) — deployment, key rotation, the full env reference
 - [The agent contract](../functional/07-agent-contract.md) — the rules an agent follows, including content-is-data

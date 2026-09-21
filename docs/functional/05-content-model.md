@@ -62,9 +62,9 @@ is the summary.
 | Folder | Holds | Lifespan |
 |---|---|---|
 | `00-inbox/` | Unplaced captures, `needs-filing: true` | Days |
-| `05-memory/` | How we work — rules an agent applies without being told | Until corrected |
+| `05-memory/` | How we work everywhere — rules an agent applies whatever it is working on | Until corrected |
 | `10-knowledge/{topic}/` | Durable reference — how things work | Years |
-| `20-projects/{project}/` | Work-scoped notes, status, questions | Project |
+| `20-projects/{project}/` | Work-scoped notes, status, questions, and the rules true only here | Project |
 | `30-people/` | Roles, ownership, working preferences | Ongoing |
 | `40-decisions/{yyyy}/` | Choices and reasoning, ADR-style | Permanent |
 | `50-playbooks/` | Executable procedures | Until superseded |
@@ -93,6 +93,39 @@ knowledge in `10-knowledge/`, the decision in `40-decisions/2026/`, and the
 working notes in `20-projects/` can all carry the same slug without sharing a
 folder. See [ADR-0005](../technical/12-adr/0005-one-installation-many-projects.md).
 
+### A project may carry its own convention
+
+`20-projects/{project}/content-structure.md`, where a project has one, is the
+authority for everything inside that project. The root document still decides
+what belongs in `20-projects/` at all; the project's document is additive, never
+a replacement.
+
+It is optional, and most projects will not have one. A project without one
+behaves exactly as before — flat files, root convention governing. That is the
+normal case, not a gap to be filled.
+
+`brain_structure` takes an optional project and returns that project's document
+and its subtree instead of the brain's. It is `FORBIDDEN` when the actor cannot
+read the project, checked before existence so that a project out of scope cannot
+be told apart from one that does not exist, and `NOT_FOUND` when there is no such
+project. The folder is the boundary being checked, which is what
+[ADR-0008](../technical/12-adr/0008-project-scope-is-the-project-folder.md)
+settles.
+
+Drift is measured against whichever convention governs the folder: the project's
+own where it has one, the root document otherwise. A document sitting directly in
+the project folder is never drift — there is no subfolder there for a heading to
+declare. A subfolder of a project that has no convention of its own is measured
+against the root document, which names `20-projects/{project}/` and no deeper, so
+it is reported as drift until the project declares it. That is a note to tidy up,
+never a refusal ([ADR-0002](../technical/12-adr/0002-safety-only-write-guards.md)).
+
+The cost is a second place to look. Someone reading a project folder has to know
+whether it files things its own way before trusting the root document about it,
+and two documents can drift apart in wording. That is why the root document
+points at the project's rather than trying to describe project internals itself,
+and why `brain_structure` returns one or the other instead of merging them.
+
 ### The distinction that carries the most weight
 
 **Knowledge vs project.** The test in the structure document — *if this project
@@ -106,10 +139,24 @@ after the fact by promoting knowledge out of finished projects.
 memory. "How our package resolution works" is knowledge. The test is whether an
 agent starting cold needs to apply it without being asked.
 
-This folder exists because agentic tools accumulate exactly this kind of fact and
+**Memory also splits by reach.** `05-memory/` holds only what is true everywhere,
+whatever an agent is working on — "never commit unless asked". A rule true of a
+single project goes in `20-projects/{project}/memory/`, where it sits inside the
+thing it describes and travels with it into the archive when the project ends.
+The project folder is already the access boundary
+([ADR-0008](../technical/12-adr/0008-project-scope-is-the-project-folder.md)), so
+a scope on a project covers its memory too, rather than needing a second scope on
+a slice of `05-memory/`. The rule of thumb the presets state: if you are about to
+name a memory file after a project, it belongs in that project.
+
+The cost is two places to read at the start of a session instead of one. What is
+bought is that `05-memory/` stays short enough to be worth reading every time,
+and that rules for work nobody is doing today are not in it.
+
+`05-memory/` exists because agentic tools accumulate exactly this kind of fact and
 currently scatter it into per-repo rules files, which is the problem
-[the overview](./01-overview.md) opens by naming. Memory files are read at the
-start of sessions, so they are kept short deliberately.
+[the overview](./01-overview.md) opens by naming. Splitting by reach is the same
+move made one level down: a rule lives with the smallest thing it is true of.
 
 **Sessions are the known trap.** Agents naturally log what they did, and that
 log is where durable findings get buried. Every preset warns about this in the

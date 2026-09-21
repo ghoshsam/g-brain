@@ -50,6 +50,7 @@ someone would otherwise break them.
 | [12](./12-search.md) | `packages/search` | Ranking, from an index allowed to be wrong | [search design](../06-search-design.md) |
 | [13](./13-apps-mcp.md) | `apps/mcp` | Tools, resources, prompts, both transports | [MCP reference](../05-mcp-reference.md) |
 | [14](./14-apps-cli.md) | `apps/cli` | `init`, `doctor`, `index`, `serve` | [operations](../09-operations.md) |
+| [15](./15-apps-web.md) | `apps/web` | Read-only browsing: projects, folder tree, document, search | [ADR-0009](../12-adr/0009-read-only-web-ui.md) |
 
 ## How they fit together
 
@@ -61,6 +62,7 @@ flowchart TB
     subgraph surfaces["surfaces — thin mappings, no logic"]
         mcp["apps/mcp"]
         cli["apps/cli"]
+        web["apps/web — read only"]
     end
 
     ops["core/ops — the public API<br/>owns the 12-step write path"]
@@ -89,6 +91,8 @@ flowchart TB
     agent -->|stdio / streamable HTTP| mcp
     mcp --> ops
     cli --> ops
+    human -->|browser, reads only| web
+    web --> ops
     ops --> guardrails
     ops --> content
     ops --> ports
@@ -218,6 +222,7 @@ Enforced by a workspace test in
 | `packages/search` | `types` only |
 | `apps/mcp` | `core` + the MCP SDK |
 | `apps/cli` | `core` + `commander`, `@clack/prompts`, `picocolors` |
+| `apps/web` | `core` + an HTTP server and a view layer, and nothing that writes |
 
 Two prohibitions worth stating separately, because they are how this
 architecture erodes:

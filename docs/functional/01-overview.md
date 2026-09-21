@@ -43,10 +43,11 @@ it to a new team is rewriting a document — not a migration, not a code change.
 - **No database.** Git provides history, diff, blame, and rollback — the things
   a database would have been for. The search index is derived from the files
   and can be thrown away and rebuilt.
-- **Two surfaces over one core:** an MCP server (stdio and streamable HTTP) and
-  the `gbrain` CLI. All logic lives in `packages/core`; both surfaces are thin,
-  so they cannot drift apart. Agent skills ride on the MCP tools rather than
-  being a third surface.
+- **Thin surfaces over one core:** an MCP server (stdio and streamable HTTP),
+  the `gbrain` CLI, and a read-only web UI
+  ([ADR-0009](../technical/12-adr/0009-read-only-web-ui.md)). All logic lives in
+  `packages/core`; every surface is thin, so they cannot drift apart. Agent
+  skills ride on the MCP tools rather than being a surface of their own.
 - **Humans read the brain as a git repo.** The git host renders the folder tree,
   `content-structure.md`, and individual documents, and searches their text; VS
   Code or Obsidian open the same files locally. Nothing has to be built for this,
@@ -68,9 +69,12 @@ it to a new team is rewriting a document — not a migration, not a code change.
 
 ## Non-goals
 
-- **Not a wiki or a CMS.** There is no editing UI. Writes go through MCP;
-  humans edit markdown in their editor or through an agent, and commit it like
-  any other file.
+- **Not a wiki or a CMS.** There is no editing UI. The web UI reads only — it
+  lists projects, browses a folder tree, opens a document, searches — and has no
+  create, edit, move, or delete path
+  ([ADR-0009](../technical/12-adr/0009-read-only-web-ui.md)). Writes go through
+  MCP; humans edit markdown in their editor or through an agent, and commit it
+  like any other file.
 - **Not a memory layer for a single agent.** It is deliberately shared. If only
   one agent reads it, a local file would do.
 - **Not a RAG pipeline.** Retrieval is structured first — folders, tags, links,

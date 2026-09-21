@@ -70,12 +70,42 @@ parsing the description:
 | `idempotentHint: true` | `brain_write` when `idempotencyKey` is supplied |
 | `destructiveHint: false` | all of them — nothing in this surface removes content; delete is a move to `90-archive/` (FR-12) and revert is a new commit |
 
+### The `project` argument
+
+`brain_list`, `brain_tree`, and `brain_search` take `project` wherever they take
+a folder. It resolves to `20-projects/{project}/`, and that is the whole of it:
+**sugar over the folder argument, not a second addressing scheme**
+([ADR-0008](./12-adr/0008-project-scope-is-the-project-folder.md)). By the time
+`core` decides anything the argument is a path, so containment, authorisation,
+and errors are the folder's.
+
+Two consequences, and both are the point of doing it this way:
+
+- **A project the caller cannot read is `FORBIDDEN`**, exactly as the folder
+  would be. There is no separate project permission to get wrong, and the
+  `project:` frontmatter field has no bearing on it — authorisation reads the
+  path and never the body
+  ([security](./08-security.md#project-scoping)).
+- **A project code naming no directory behaves as the equivalent folder does.**
+  `brain_tree` returns `NOT_FOUND`; `brain_list` and `brain_search` return an
+  empty result, because neither has a `NOT_FOUND` to return.
+
+Supplying `project` and `folder` on the same call is **undecided**. ADR-0008
+does not settle whether the narrower wins or the call is rejected, and that is
+recorded here rather than guessed at.
+
+`brain_structure` also takes `project`, and there it is **not** sugar over a
+folder: it selects which filing convention is returned, not which subtree is
+listed. It is documented with that tool below.
+
 ---
 
 ### `brain_structure`
 
 ```ts
-{}   // no arguments
+{
+  project: z.string().optional()   // a project code, not a path
+}
 ```
 
 ```ts
@@ -98,8 +128,26 @@ A brain with no `content-structure.md` returns successfully with
 `structureMissing: true` and the tree. A half-set-up brain is still usable, and
 an agent given a tree and no convention should write to `00-inbox/`.
 
-**Errors:** `UNAUTHORIZED`, `FORBIDDEN`, `RATE_LIMITED`. There is no `NOT_FOUND`
-here by design.
+**With `project`, the same shape describes that project instead.** A project may
+carry its own `content-structure.md`, and where it does that document is the
+authority for everything inside the project — the root document still decides
+what belongs in `20-projects/` at all, so the project's is additive and never a
+replacement. The call returns the project's document byte-for-byte, `brainName`
+as the project code, and a tree rooted at the project folder rather than at the
+brain. A project with no document of its own returns `structureMissing: true`
+with its tree, exactly as a brain mid-setup does: that is the ordinary case — the
+project files flat and the root convention governs — not a half-set-up project.
+
+**Errors without `project`:** `UNAUTHORIZED`, `FORBIDDEN`, `RATE_LIMITED`. There
+is no `NOT_FOUND` for the brain-wide call by design.
+
+**Errors with `project`:** `FORBIDDEN` when the caller's scopes do not cover
+`20-projects/{project}/`, and `NOT_FOUND` when no such directory exists.
+**Authorisation is tested before existence**, so a caller outside a project's
+scope gets `FORBIDDEN` whether or not that project exists, and learns nothing
+about which. Testing existence first would turn `NOT_FOUND` into a probe for
+project names — the same leak the folder tree is pruned rather than withheld to
+prevent ([security](./08-security.md#project-scoping)).
 
 **Shipped description:**
 
@@ -108,7 +156,10 @@ here by design.
 > in a session and choose the path from what it returns, never from memory or
 > from another brain's conventions: the convention differs per brain and
 > changes. If your client supports resources, attach `brain://structure` for the
-> whole session instead of calling this repeatedly.
+> whole session instead of calling this repeatedly. Pass `project` to get that
+> project's own convention and its subtree instead: a project may file its
+> internals its own way, and where it does, that document is the authority for
+> anything inside it.
 
 ---
 
@@ -153,6 +204,7 @@ only ([FR-27](../functional/06-functional-requirements.md)).
 ```ts
 {
   folder: z.string().optional(),
+  project: z.string().optional(),        // resolves to 20-projects/{project}/
   tag: z.string().optional(),
   type: z.string().optional(),
   status: z.string().optional(),
@@ -188,6 +240,11 @@ document has no such frontmatter field — frontmatter is linted, not enforced
 ([ADR-0002](./12-adr/0002-safety-only-write-guards.md)), so any consumer must
 tolerate missing values.
 
+`project` is the `folder` argument under another name: `project: 'billing'` is
+`folder: '20-projects/billing/'`, and it is filtering on the path rather than on
+the `project:` field those items carry
+([the `project` argument](#the-project-argument)).
+
 The listing is a filesystem walk with frontmatter parsing, so it costs
 proportionally to the corpus. Past a few thousand documents, prefer
 `brain_search` with filters.
@@ -202,6 +259,7 @@ proportionally to the corpus. Past a few thousand documents, prefer
 ```ts
 {
   root: z.string().optional(),                        // default: the brain root
+  project: z.string().optional(),                     // 20-projects/{project}/ as the root
   depth: z.number().int().min(1).max(10).default(3)
 }
 ```
@@ -218,8 +276,14 @@ The tree without the structure document — cheap orientation when an agent need
 to know what exists, not how to file. Roughly 50× smaller in tokens than
 `brain_structure` on a typical brain. `.brain/` and `.git/` are never listed.
 
-**Errors:** `INVALID_PATH`, `NOT_FOUND` (an explicit `root` that does not exist),
-`UNAUTHORIZED`, `FORBIDDEN`.
+`project` sets the root to `20-projects/{project}/`
+([the `project` argument](#the-project-argument)). That is the call behind
+browsing one project after selecting it from a list, and the tree it returns is
+the filesystem's, not an idealised one
+([ADR-0009](./12-adr/0009-read-only-web-ui.md)).
+
+**Errors:** `INVALID_PATH`, `NOT_FOUND` (an explicit `root` that does not exist,
+or a `project` code that names no directory), `UNAUTHORIZED`, `FORBIDDEN`.
 
 ---
 
@@ -373,6 +437,7 @@ detection runs on create only.
 {
   q: z.string().min(1),
   folder: z.string().optional(),
+  project: z.string().optional(),        // resolves to 20-projects/{project}/
   tag: z.string().optional(),
   type: z.string().optional(),
   limit: z.number().int().min(1).max(50).default(10)
@@ -396,7 +461,9 @@ detection runs on create only.
 ```
 
 Filters narrow the query inside the index rather than filtering afterwards, so
-`folder`-scoped search stays cheap. `90-archive/` is de-prioritised by a rank
+`folder`-scoped search stays cheap. `project` is `folder` with the
+`20-projects/` prefix supplied for you, and costs the same
+([the `project` argument](#the-project-argument)). `90-archive/` is de-prioritised by a rank
 penalty, not excluded — superseded decisions must stay findable
 ([ADR-0004](./12-adr/0004-lexical-search-first.md)).
 
@@ -757,5 +824,6 @@ the two surfaces incapable of disagreeing about what a write does.
 - [Functional requirements](../functional/06-functional-requirements.md) — the FR-nn each tool implements
 - [Storage and concurrency](./04-storage-and-concurrency.md) — etags, locks, atomic writes
 - [Security](./08-security.md) — keys, scopes, secret scanning
+- [ADR-0008 — A project is a folder](./12-adr/0008-project-scope-is-the-project-folder.md) — what `project` resolves to, and why it is only sugar
 - [Operations](./09-operations.md) — running the HTTP transport
 - [Search design](./06-search-design.md) — what `brain_search` ranks and why

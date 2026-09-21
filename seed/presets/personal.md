@@ -1,15 +1,20 @@
 # Content Structure
 
-This is a personal brain. It is small on purpose — four folders, no ceremony.
+This is a personal brain. It is small on purpose — a handful of folders, no ceremony.
 Read this before writing anything.
 
 **How to choose a location**
 
-1. Is it something I want to be able to look up later? → `notes/`
-2. Is it tied to one thing I am actively working on? → `projects/{project}/`
-3. Is it a session log or scratch I will not need next month? → `log/`
-4. Is it finished or no longer true? → `archive/`
-5. Genuinely unsure? → `inbox/`, with `needs-filing: true` and a one-line
+1. Is it a rule I want applied without being asked? → `memory/` if it holds
+   whatever I am doing, `projects/{project}/memory/` if it is only true of one
+   project.
+2. Is it something I want to be able to look up later? → `notes/`
+3. Is it tied to one thing I am actively working on? → `projects/{project}/`.
+   If that project has its own `content-structure.md`, that file decides where
+   inside it — not this one.
+4. Is it a session log or scratch I will not need next month? → `log/`
+5. Is it finished or no longer true? → `archive/`
+6. Genuinely unsure? → `inbox/`, with `needs-filing: true` and a one-line
    reason. That is a correct answer, not a failure.
 
 **Search before you create.** Improving an existing note beats adding a second
@@ -48,8 +53,14 @@ regularly — an inbox that never empties is just a second, worse `notes/`.
 
 ## memory/
 
-Things I want an agent to apply without me repeating them. Preferences, standing
-rules, corrections that should stick.
+Things I want an agent to apply without me repeating them, **whatever I happen to
+be working on**. Preferences, standing rules, corrections that should stick.
+
+**A rule that is only true of one project goes in that project instead** —
+`projects/{project}/memory/`, where it sits with the work it describes and goes
+to the archive with it. "Ask before installing anything" holds everywhere; "this
+site deploys from `main` only" belongs to the project. If I am about to name a
+memory file after a project, that is the signal.
 
 **Does not belong here:** explanations I would look up when I need them — those
 are `notes/`.
@@ -87,6 +98,20 @@ part gets buried in a folder I stop opening.
 
 A project is a piece of work, not a repo — reuse an existing folder rather than
 starting a new one because I am in a different checkout.
+
+**A project can file its own internals its own way.** Drop a
+`content-structure.md` in the project folder and it becomes the authority for
+everything inside that project — this file still decides what belongs in
+`projects/` at all, but not how one project arranges itself. Ask
+`brain_structure` for that project to read it. Most projects never need one:
+flat files, and this file governs. That is the normal case, not an oversight.
+
+The subfolder worth knowing about is `memory/` — rules that apply to this
+project and nowhere else, kept as short as the ones at the top level.
+
+A subfolder inside a project should be declared in that project's own
+`content-structure.md`, or it shows up as drift — a nudge to tidy, never a
+refused write. A file sitting directly in the project folder is never drift.
 
 Finished projects move to `archive/projects/{project}/`.
 

@@ -65,6 +65,13 @@ export interface BrainConfig {
   duplicateThreshold: number
   searchMode: 'lexical'
   sessionExpiryDays: number
+  /**
+   * The folder projects live under. Configurable because presets disagree:
+   * `default` says `20-projects`, `personal` says `projects`. Core cannot read
+   * the name out of the structure document without parsing it for meaning,
+   * which ADR-0001 rejects.
+   */
+  projectsFolder: string
 }
 
 export type DocStatus = 'draft' | 'active' | 'superseded'

@@ -1,4 +1,4 @@
-import { readFileSync, readdirSync, statSync } from 'node:fs'
+import { existsSync, readFileSync, readdirSync, statSync } from 'node:fs'
 import { join } from 'node:path'
 import { describe, expect, it } from 'vitest'
 
@@ -24,8 +24,24 @@ const walk = (dir: string): string[] => {
   return out
 }
 
+/**
+ * Discovered, never listed. A surface added later inherits these rules without
+ * anyone remembering to extend an array — which is how a thin-surface rule
+ * actually gets broken.
+ */
+const APPS = readdirSync(join(ROOT, 'apps'))
+  .filter((entry) => existsSync(join(ROOT, 'apps', entry, 'package.json')))
+  .map((entry) => `apps/${entry}`)
+
 describe('apps are thin', () => {
-  for (const app of ['apps/mcp', 'apps/cli']) {
+  // Discovery resolving to nothing would leave every loop below empty and the
+  // suite green with nothing asserted. The surfaces that exist today are named
+  // as a floor to make that failure loud; APPS, not this list, is the coverage.
+  it('covers every app, so adding a surface cannot escape the rules', () => {
+    expect(APPS).toEqual(expect.arrayContaining(['apps/mcp', 'apps/cli']))
+  })
+
+  for (const app of APPS) {
     it(`${app} declares no storage, git, or search dependency`, () => {
       const pkg = readPkg(app)
       const deps = Object.keys({ ...pkg.dependencies, ...pkg.devDependencies })
@@ -37,7 +53,10 @@ describe('apps are thin', () => {
     })
 
     it(`${app} does not import node:fs`, () => {
-      for (const file of walk(join(ROOT, app, 'src'))) {
+      const src = join(ROOT, app, 'src')
+      expect(existsSync(src), `${app} has a package.json but no src`).toBe(true)
+
+      for (const file of walk(src)) {
         // Tests build a temp brain to run against, which is the point of them.
         // The rule is about what the shipped surface can reach.
         if (file.endsWith('.test.ts')) continue
@@ -49,6 +68,24 @@ describe('apps are thin', () => {
       }
     })
   }
+})
+
+describe('the web surface is read-only', () => {
+  const web = join(ROOT, 'apps/web')
+
+  // ADR-0009 makes read-only the decision, not a habit. A route handler that
+  // exported one of these would reverse it quietly, so the package is checked
+  // for the export rather than the intent.
+  it('exports no route handler that writes', () => {
+    if (!existsSync(web)) return
+
+    for (const file of walk(join(web, 'src'))) {
+      const source = readFileSync(file, 'utf8')
+      expect(source, `${file} must not handle a write — writes stay on MCP`).not.toMatch(
+        /export\s+(?:async\s+)?function\s+(POST|PUT|PATCH|DELETE)\b/,
+      )
+    }
+  })
 })
 
 describe('dependencies point one way', () => {

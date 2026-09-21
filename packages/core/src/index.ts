@@ -13,11 +13,12 @@ export {
   getTree,
   history,
   listDocs,
+  listProjects,
   readDoc,
   search,
   writeDoc,
 } from './ops/index.js'
-export type { ListFilters, WriteOutput } from './ops/index.js'
+export type { ListFilters, ProjectSummary, WriteOutput } from './ops/index.js'
 
 export { assertSafeBrainRoot, loadConfig } from './config/index.js'
 export { openBrain } from './context.js'

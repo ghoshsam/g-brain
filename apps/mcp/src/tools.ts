@@ -41,10 +41,17 @@ export const TOOLS: ToolDefinition[] = [
       'choose the path from what it returns, never from memory or from another brain’s',
       'conventions: the convention differs per brain and changes. If your client supports',
       'resources, attach brain://structure for the whole session instead of calling this',
-      'repeatedly.',
+      'repeatedly. Pass project to get that project’s own convention and its subtree instead:',
+      'a project may file its internals its own way, and where it does, that document is the',
+      'authority for anything inside it.',
     ].join(' '),
-    inputSchema: {},
-    run: (ctx) => getStructure(ctx),
+    inputSchema: {
+      project: z
+        .string()
+        .optional()
+        .describe('A project code. Returns that project’s convention rather than the brain’s.'),
+    },
+    run: (ctx, args) => getStructure(ctx, args),
   },
 
   {

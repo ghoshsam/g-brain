@@ -21,6 +21,7 @@ const baseConfig: BrainConfig = {
   duplicateThreshold: 0.9,
   searchMode: 'lexical',
   sessionExpiryDays: 30,
+  projectsFolder: '20-projects',
 }
 
 const makeCtx = (

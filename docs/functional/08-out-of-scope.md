@@ -37,7 +37,14 @@ product shape.
 **Today.** Run one instance per brain. They are cheap: a process, a folder, a
 git repo.
 
-**Reconsider when** someone wants to offer g-brain as a hosted service.
+**Unchanged by the web UI.** The read-only UI
+([ADR-0009](../technical/12-adr/0009-read-only-web-ui.md)) is a third surface
+over one brain, run by the team that owns that brain. It serves one
+`BRAIN_ROOT` like every other surface, and nothing about it is hosted for
+anyone else.
+
+**Reconsider when** someone wants to offer g-brain as a hosted service to teams
+that do not run it themselves.
 
 ---
 
@@ -85,13 +92,36 @@ explicit capture the agent stands behind, not as a background process.
 ## Access control below folder level
 
 Scopes are per folder. No per-document ACLs, no field-level redaction, no
-per-user views.
+per-person views.
 
 **Why out.** Folder scopes cover the real need (a read-only research agent, a
 write-capable capture agent), and finer control implies an identity system.
 
-**Reconsider when** a brain needs to hold content some readers must not see —
-at which point the better answer is usually a second brain.
+**The trigger fired, and the answer stayed at folder level.** A team needed
+project-level access inside one brain — the case this section said would be
+answered with a second brain. It arrived without going below folder level,
+because a project *is* the folder `20-projects/{project}/`, so scoping a project
+is scoping a folder and there is no new authorisation code
+([ADR-0008](../technical/12-adr/0008-project-scope-is-the-project-folder.md)).
+The `project:` frontmatter field still groups content for search, and is never
+an input to an authorisation decision — frontmatter is linted, not enforced, so
+an agent could write its own way in. What that buys is paid for in prose:
+`10-knowledge/` and `40-decisions/` stay team-wide, so content that must not
+cross a project boundary has to be filed in the project folder. A filing rule,
+not a code rule.
+
+**What is still out.** Access is per key, not per person. Two people sharing a
+key are one caller, revoking one person means rotating a key others hold, and
+the audit log names a key where a team will want a name. A view can differ
+between callers — the web UI lists only the projects a caller's read scopes
+cover — but that is a scope difference, never a person difference.
+[ADR-0009](../technical/12-adr/0009-read-only-web-ui.md) records this as an
+accepted cost rather than solving it.
+
+**Reconsider when** more than a handful of people need different project access,
+or the audit log has to name a person. That is user identity beside the agent
+keys, and the seam for it is the `Actor` that `core/auth` already evaluates —
+not per-document ACLs, which stay out.
 
 ---
 

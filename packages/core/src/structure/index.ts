@@ -1,7 +1,8 @@
 import type { Dirent } from 'node:fs'
 import { readFile, readdir } from 'node:fs/promises'
 import path from 'node:path'
-import type { BrainContext, DocPath, DriftRecord, Result } from '../types.js'
+import { authorise } from '../auth/index.js'
+import type { Actor, BrainContext, DocPath, DriftRecord, Result } from '../types.js'
 import { err, ok } from '../types.js'
 
 export interface StructureResult {
@@ -81,7 +82,13 @@ const countMarkdown = async (dir: string): Promise<number> => {
   }
 }
 
-const walk = async (dir: string, rel: string, headings: string[][]): Promise<FolderNode[]> => {
+const walk = async (
+  dir: string,
+  rel: string,
+  /** The path a heading would use. Differs from `rel` under a project's own document. */
+  declared: string,
+  headings: string[][],
+): Promise<FolderNode[]> => {
   let entries: Dirent[] = []
   try {
     entries = await readdir(dir, { withFileTypes: true })
@@ -92,24 +99,48 @@ const walk = async (dir: string, rel: string, headings: string[][]): Promise<Fol
   for (const entry of entries) {
     if (!entry.isDirectory() || EXCLUDED_FOLDERS.has(entry.name)) continue
     const childRel = rel === '' ? entry.name : `${rel}/${entry.name}`
+    const childDeclared = declared === '' ? entry.name : `${declared}/${entry.name}`
     const childDir = path.join(dir, entry.name)
     nodes.push({
       path: childRel,
       docCount: await countMarkdown(childDir),
-      children: await walk(childDir, childRel, headings),
-      undeclared: !isDeclared(childRel, headings),
+      children: await walk(childDir, childRel, childDeclared, headings),
+      undeclared: !isDeclared(childDeclared, headings),
     })
   }
   nodes.sort((left, right) => left.path.localeCompare(right.path))
   return nodes
 }
 
-const readStructureDoc = async (root: string): Promise<string | null> => {
+const readStructureDoc = async (dir: string): Promise<string | null> => {
   try {
-    return await readFile(path.join(root, STRUCTURE_DOC), 'utf8')
+    return await readFile(path.join(dir, STRUCTURE_DOC), 'utf8')
   } catch {
     return null
   }
+}
+
+/**
+ * Splits a folder into the project that governs it and the part inside that
+ * project, or null when the folder is not inside one. The root document cannot
+ * describe a project's internals, so a project may carry its own.
+ */
+const projectScopeOf = (
+  ctx: BrainContext,
+  folder: string[],
+): { folder: string[]; inner: string[] } | null => {
+  const base = segmentsOf(ctx.config.projectsFolder)
+  if (base.length === 0 || folder.length <= base.length) return null
+
+  const sameBase = base.every(
+    (segment, index) => segment.toLowerCase() === (folder[index] ?? '').toLowerCase(),
+  )
+  if (!sameBase) return null
+
+  const project = folder[base.length] ?? ''
+  if (project === '') return null
+
+  return { folder: [...base, project], inner: folder.slice(base.length + 1) }
 }
 
 const rootExists = async (root: string): Promise<boolean> => {
@@ -121,17 +152,69 @@ const rootExists = async (root: string): Promise<boolean> => {
   }
 }
 
-export async function getStructure(ctx: BrainContext): Promise<Result<StructureResult>> {
+/**
+ * A folder name is information. core/auth refuses to name folders a caller
+ * cannot read, on the grounds that doing so leaks the shape of the brain — so
+ * the tree it is handed has to be pruned the same way, or the tree gives back
+ * exactly what the error withheld.
+ */
+const visibleTo = (actor: Actor, nodes: FolderNode[]): FolderNode[] => {
+  const visible: FolderNode[] = []
+  for (const node of nodes) {
+    if (authorise(actor, node.path, 'read').ok) {
+      visible.push(node)
+      continue
+    }
+    const children = visibleTo(actor, node.children)
+    // Kept only as the path to something readable below it. Its own count is
+    // zeroed, because reporting it would describe documents the actor cannot
+    // open.
+    if (children.length > 0) visible.push({ ...node, docCount: 0, children })
+  }
+  return visible
+}
+
+export async function getStructure(
+  ctx: BrainContext,
+  options: { project?: string } = {},
+): Promise<Result<StructureResult>> {
   if (!(await rootExists(ctx.root))) {
     return err('NOT_FOUND', `The brain root ${ctx.root} cannot be read. Check BRAIN_ROOT exists.`)
   }
-  const markdown = await readStructureDoc(ctx.root)
+
+  if (options.project === undefined) {
+    const markdown = await readStructureDoc(ctx.root)
+    const headings = markdown === null ? [] : extractFolderHeadings(markdown)
+    return ok({
+      brainName: path.basename(ctx.root),
+      markdown: markdown ?? '',
+      structureMissing: markdown === null,
+      tree: visibleTo(ctx.actor, await walk(ctx.root, '', '', headings)),
+    })
+  }
+
+  const folder = `${ctx.config.projectsFolder}/${options.project}`
+
+  // Authorised before existence is tested, so a project out of scope cannot be
+  // told apart from one that is not there.
+  const allowed = authorise(ctx.actor, folder, 'read')
+  if (!allowed.ok) return allowed
+
+  const dir = path.join(ctx.root, ...segmentsOf(folder))
+  if (!(await rootExists(dir))) {
+    return err(
+      'NOT_FOUND',
+      `There is no project called ${options.project}. Call brain_structure without a project to see the ones there are.`,
+    )
+  }
+
+  const markdown = await readStructureDoc(dir)
   const headings = markdown === null ? [] : extractFolderHeadings(markdown)
   return ok({
-    brainName: path.basename(ctx.root),
+    brainName: options.project,
     markdown: markdown ?? '',
     structureMissing: markdown === null,
-    tree: await walk(ctx.root, '', headings),
+    tree: visibleTo(ctx.actor, await walk(dir, folder, '', headings)),
   })
 }
 
@@ -141,7 +224,7 @@ export async function getTree(ctx: BrainContext): Promise<Result<FolderNode[]>> 
   }
   const markdown = await readStructureDoc(ctx.root)
   const headings = markdown === null ? [] : extractFolderHeadings(markdown)
-  return ok(await walk(ctx.root, '', headings))
+  return ok(visibleTo(ctx.actor, await walk(ctx.root, '', '', headings)))
 }
 
 export async function checkDrift(ctx: BrainContext, docPath: DocPath): Promise<DriftRecord | null> {
@@ -151,10 +234,22 @@ export async function checkDrift(ctx: BrainContext, docPath: DocPath): Promise<D
     if (segments[0] === STRUCTURE_DOC) return null
     return { path: docPath, reason: 'root-level-document' }
   }
-  const folder = segments.slice(0, -1).join('/')
+  const folderSegments = segments.slice(0, -1)
+
+  const scope = projectScopeOf(ctx, folderSegments)
+  if (scope !== null) {
+    const own = await readStructureDoc(path.join(ctx.root, ...scope.folder))
+    if (own !== null) {
+      // Directly in the project folder, so there is no subfolder to declare.
+      if (scope.inner.length === 0) return null
+      const declared = extractFolderHeadings(own)
+      if (declared.some((heading) => headingCovers(heading, scope.inner))) return null
+      return { path: docPath, reason: 'undeclared-folder' }
+    }
+  }
+
   const markdown = await readStructureDoc(ctx.root)
   const headings = markdown === null ? [] : extractFolderHeadings(markdown)
-  const folderSegments = segmentsOf(folder)
   if (headings.some((heading) => headingCovers(heading, folderSegments))) return null
   return { path: docPath, reason: 'undeclared-folder' }
 }

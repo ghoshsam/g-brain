@@ -42,6 +42,7 @@ something. Full steps in [getting started](./01-getting-started.md).
 | [6. Keeping it worth reading](./06-maintenance.md) | Tidying up, and backups |
 | [7. Troubleshooting](./07-troubleshooting.md) | When something goes wrong |
 | [8. Sharing with a team](./08-sharing-with-a-team.md) | One brain for several people |
+| [9. Reading it in a browser](./09-reading-it-in-a-browser.md) | A web page that lists your projects. Read-only |
 
 ---
 

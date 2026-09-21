@@ -22,6 +22,7 @@ const config: BrainConfig = {
   duplicateThreshold: 0.9,
   searchMode: 'lexical',
   sessionExpiryDays: 30,
+  projectsFolder: '20-projects',
 }
 
 const p = (s: string): DocPath => s as DocPath

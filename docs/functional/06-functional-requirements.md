@@ -11,11 +11,11 @@ Verification requires every `FR-nn` to map to at least one test.
 **Priority:** P0 = v1 cannot ship without it · P1 = v1 should have it ·
 P2 = deferred but designed for.
 
-**Surface.** MCP is the only network surface — stdio for local clients,
+**Surface.** MCP is the only surface that writes — stdio for local clients,
 streamable HTTP for remote ones. Requirements are written against
-`packages/core` operations, which the MCP tools expose and the CLI calls
-directly, so they are transport-neutral: a requirement states what the operation
-does, never how a transport reports it.
+`packages/core` operations, which the MCP tools expose, the CLI calls directly,
+and the read-only web UI reads through, so they are transport-neutral: a
+requirement states what the operation does, never how a transport reports it.
 
 ## Error results
 
@@ -162,7 +162,7 @@ operation → `FORBIDDEN`. A read-only key cannot write anywhere.
 ### FR-19 — Health endpoint (P1)
 The streamable HTTP transport exposes `GET /health` returning brain root
 reachability, document count, index freshness, and git status. The only plain
-HTTP endpoint.
+HTTP endpoint that transport exposes.
 
 ---
 
@@ -283,6 +283,69 @@ and capture fixtures with **no skill loaded**.
 
 ---
 
+## Projects and the web UI
+
+### FR-33 — A project code resolves to its folder (P1)
+Operations that take a `folder` also take a `project` code, which resolves to
+`20-projects/{project}/`. It is sugar over `folder`, not a second addressing
+scheme
+([ADR-0008](../technical/12-adr/0008-project-scope-is-the-project-folder.md)).
+
+- `project: billing` and `folder: 20-projects/billing` return the same result to
+  the same caller, including the same error.
+- Scopes match whole path segments, so a scope on `20-projects/billing` covers
+  `20-projects/billing/**` and never reaches `20-projects/billing-platform`.
+- There is no new authorisation path: a project is authorised by the folder
+  scope of FR-18, and nothing else.
+
+### FR-34 — Authorisation reads only the path and the scopes (P0)
+An authorisation decision is made from the requested path and the caller's
+scopes. It never reads a document body or its frontmatter — in particular, never
+the `project:` field.
+
+- Frontmatter is linted, not enforced, so `project: finance` in a body grants
+  nothing and hides nothing.
+- Authorisation happens before the content is parsed, so an agent's own text
+  cannot decide whether the agent may write it.
+- `project:` keeps its grouping and filtering job in the
+  [content model](./05-content-model.md). It is not an access control field.
+
+Verified by asserting the decision for a given actor and path is identical
+whatever frontmatter or body the request carries.
+
+### FR-35 — The project list is filtered by read scope (P1)
+Listing projects lists the directories under `20-projects/`, filtered to those
+the caller's read scopes cover. A project the caller cannot read is **absent**,
+never listed and disabled — naming it would leak the shape of the brain
+([ADR-0009](../technical/12-adr/0009-read-only-web-ui.md)).
+
+- The list is derived from the filesystem at call time. There is no manifest, so
+  the list and the access rules cannot disagree.
+- A caller whose scopes cover no project gets an empty list, and nothing in the
+  response says there was anything to hide.
+- Addressing a project directly is still FR-18: out of scope is `FORBIDDEN`.
+  Listing omits; an operation refuses.
+
+### FR-36 — The web UI reads, and never writes (P1)
+A read-only web UI lists projects, browses one project's folder tree, reads a
+document, and searches. It has no create, edit, move, or delete path, and it
+introduces no notion of a user — it is a caller like any other, carrying the
+local actor where `AUTH_REQUIRED` is `false` or a bearer key over HTTP, for
+which a read-only recall key is the right shape (FR-31).
+
+- It is a view over `brain_tree`, `brain_list`, `brain_read`, and
+  `brain_search`, and holds no logic — the rule that keeps `apps/mcp` and
+  `apps/cli` thin applies to it unchanged.
+- The tree it shows is the filesystem, never an idealised structure read out of
+  `content-structure.md`.
+- Access is per key, not per person: two viewers sharing a key are one caller,
+  and the audit log names the key. An accepted cost, recorded in ADR-0009.
+
+Verified by the surface exposing no mutating operation, under the same
+architecture tests the other surfaces pass.
+
+---
+
 ## Traceability
 
 | Area | FRs | Primary flow |
@@ -296,6 +359,7 @@ and capture fixtures with **no skill loaded**.
 | Health & presentation | FR-26 – FR-27 | [UC-3](./04-use-cases.md), [UC-4](./04-use-cases.md) |
 | Adoption | FR-28 – FR-30 | [Onboarding](./03-onboarding.md), [agent contract](./07-agent-contract.md) |
 | Multi-writer safety | FR-31 – FR-32 | [UC-4](./04-use-cases.md), cross-cutting |
+| Projects & the web UI | FR-33 – FR-36 | [UC-3](./04-use-cases.md), cross-cutting |
 
 FR-25 is the only P2 — an interface shipped without its implementation. Every
 other FR maps to at least one test.

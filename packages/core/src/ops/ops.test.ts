@@ -48,6 +48,7 @@ const config = (overrides: Partial<BrainConfig> = {}): BrainConfig => ({
   duplicateThreshold: 0.9,
   searchMode: 'lexical',
   sessionExpiryDays: 90,
+  projectsFolder: '20-projects',
   ...overrides,
 })
 

@@ -28,6 +28,7 @@ const config = (brainRoot: string): BrainConfig => ({
   duplicateThreshold: 0.9,
   searchMode: 'lexical',
   sessionExpiryDays: 90,
+  projectsFolder: '20-projects',
 })
 
 const localActor: Actor = {

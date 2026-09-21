@@ -69,6 +69,7 @@ program was handed are the ones it uses.
 | `DUPLICATE_THRESHOLD` | `0.9` | How close a new note has to be to an existing one before it is refused for being nearly the same. |
 | `AUDIT_MAX_BYTES` | `8388608` | 8 MiB, then the activity log is renamed and a fresh one started. It is never trimmed. |
 | `AUDIT_KEEP` | `8` | How many old activity logs to keep. |
+| `PROJECTS_FOLDER` | `20-projects` | The folder your projects live in, and the boundary a key can be limited to. Change it only if your folder list calls it something else — the `personal` list uses `projects`. |
 | `SEARCH_MODE` | `lexical` | How search works. `lexical` means plain word matching, and it is the only choice today. |
 | `SESSION_EXPIRY_DAYS` | `90` | How old a session note may get before `gbrain doctor` lists it as expired. Expiring moves a note to `90-archive/`. It never deletes it. |
 

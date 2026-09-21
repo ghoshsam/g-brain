@@ -8,11 +8,15 @@ without you around to explain it. Read this file before writing anything.
 
 1. Ask what the content *is*, not what you were doing when you produced it.
    A decision made during a debugging session is a decision, not a session log.
-2. Ask how long it stays true. A rule to apply from now on → `05-memory/`.
-   Durable explanation → `10-knowledge/`. Tied to one piece of work →
+2. Ask how long it stays true. A rule to apply from now on → `05-memory/` if it
+   holds everywhere, `20-projects/{project}/memory/` if it is only true of one
+   project. Durable explanation → `10-knowledge/`. Tied to one piece of work →
    `20-projects/`. True only for today → `60-sessions/`.
 3. Read the folder section below and check the "belongs here / does not belong
    here" lines. They are the actual test.
+   **If you are filing inside a project, read that project's own
+   `content-structure.md` too** — where one exists it is the authority for
+   everything inside that project, and this document is not.
 4. If two folders both fit, pick the one where someone would *look for it*, not
    the one where it was produced.
 5. If nothing fits, write to `00-inbox/` and set `needs-filing: true` in the
@@ -73,7 +77,17 @@ The curator agent and humans empty this folder; nothing should live here long.
 
 ## 05-memory/
 
-How we work. The things an agent should apply without being told.
+How we work **everywhere**. The things an agent should apply without being told,
+whatever it is working on.
+
+**This folder is for rules that cross projects.** A rule that is only true of one
+project belongs in that project's own memory — `20-projects/{project}/memory/` —
+where it sits inside the project it describes and travels with it when the
+project is archived. "Never commit unless asked" is global. "This repo uses
+pnpm, never npm" belongs to the project.
+
+If you are about to write a memory file whose name starts with a project's name,
+that is the signal it belongs in that project instead.
 
 **Belongs here:** conventions and preferences ("we use pnpm, never npm"),
 standing constraints ("never run migrations without asking"), corrections a
@@ -102,7 +116,7 @@ an explanation, move the explanation to `10-knowledge/` and leave the rule here.
 If a human corrects an agent and the correction should hold next time, it goes
 here. That is the single most valuable thing in this folder.
 
-Example: `05-memory/build-and-test.md`
+Example: `05-memory/git-hygiene.md`
 
 ---
 
@@ -143,6 +157,26 @@ stops a brain from turning into a graveyard of dead project folders.
 
 `{project}` is kebab-case and stable — pick the name once and keep it. Within a
 project folder, use flat files unless it grows past ~20 docs.
+
+**A project may file its own internals its own way.** Put a
+`content-structure.md` in the project folder and it becomes the authority for
+everything inside that project — this document still decides what belongs in
+`20-projects/` at all, but not how one project arranges itself. Call
+`brain_structure` with that project to read it. A project without one is
+perfectly normal: flat files, and this document governs.
+
+Two subfolders are worth knowing about because they recur:
+
+- **`memory/`** — rules that apply to this project and nowhere else. Same test as
+  `05-memory/`: would an agent starting cold need to apply this without being
+  asked? Keep them short; they are read at the start of a session.
+- **`decisions/`** — a choice that only matters inside this project, and that you
+  would not want a reader outside it to see. A decision with wider reach still
+  belongs in `40-decisions/{yyyy}/`.
+
+Anything you put in a project folder should be declared in that project's own
+`content-structure.md`, or it is reported as drift — which is a note to tidy up,
+never a refusal.
 
 **A project is a piece of work, not a repository.** One project often spans
 several repos, and some have no code at all — a vendor evaluation, a migration,

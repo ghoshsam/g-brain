@@ -8,10 +8,15 @@ without you around to explain it. Read this file before writing anything.
 
 1. Ask what the content *is*, not what you were doing when you produced it.
    A decision made during an incident is a decision, not an incident log.
-2. Ask how long it stays true. Durable → `10-knowledge/`. Tied to one feature →
+2. Ask how long it stays true. A rule to apply from now on → `05-memory/` if it
+   holds whatever you are working on, `20-projects/{project}/memory/` if it is
+   only true of one project. Durable → `10-knowledge/`. Tied to one feature →
    `20-projects/`. True only for today → `60-sessions/`.
 3. Read the folder section below and check the "belongs here / does not belong
    here" lines. They are the actual test.
+   **If you are filing inside a project, read that project's own
+   `content-structure.md` too** — where one exists it is the authority for
+   everything inside that project, and this document is not.
 4. If two folders both fit, pick the one where someone would *look for it*.
 5. If nothing fits, write to `00-inbox/` with `needs-filing: true` and a
    one-line reason. That is a correct answer, not a failure.
@@ -53,7 +58,17 @@ and say why in one line. An escape hatch, not a default — nothing lives here l
 
 ## 05-memory/
 
-How we work. The things an agent should apply without being told.
+How we work **everywhere**. The things an agent should apply without being told,
+whatever it is working on.
+
+**This folder is for rules that cross projects.** A rule that is only true of one
+project belongs in that project's own memory — `20-projects/{project}/memory/` —
+where it sits with the work it describes and goes to the archive with it. "Open
+a decision record before changing infrastructure" is global; "this service
+deploys from the release branch only" belongs to the project.
+
+If you are about to write a memory file whose name starts with a project's name,
+that is the signal it belongs in that project instead.
 
 **Belongs here:** conventions and preferences, standing constraints, corrections
 a human has given that should stick, the commands and tools that actually work
@@ -118,6 +133,32 @@ a graveyard of dead project folders.
 repository** — one often spans several repos, and some have none. Reuse an
 existing project folder before inventing one; check the tree first. Record the
 repos it spans in the project's `README.md`.
+
+**A project may file its own internals its own way.** Put a
+`content-structure.md` in the project folder and it becomes the authority for
+everything inside that project — this document still decides what belongs in
+`20-projects/` at all, but not how one project arranges itself. Call
+`brain_structure` with that project to read it. A project without one is the
+normal case: flat files, and this document governs.
+
+Two subfolders recur often enough to name here:
+
+- **`memory/`** — rules that apply to this project and nowhere else. Same test as
+  `05-memory/` and the same brevity: they are read at the start of a session.
+- **`decisions/`** — a choice that only matters inside this project. A decision
+  anyone outside it would want to find still belongs in `40-decisions/{yyyy}/`.
+
+**A project's own convention reaches no further than its folder.** It cannot
+claim `15-specs/` or `45-incidents/` — those sit at the brain root and this
+document governs them, whatever a project says. Requirements still go to
+`15-specs/{feature}/` and an incident still goes to `45-incidents/{yyyy}/`, so
+both stay findable by people who never open the project folder. If a project
+declares a `specs/` subfolder of its own, that is for drafting and working notes;
+the spec itself is still filed in `15-specs/`.
+
+A subfolder you create inside a project should be declared in that project's own
+`content-structure.md`, or it is reported as drift — a note to tidy up, never a
+refusal. A document sitting directly in the project folder is never drift.
 
 When the work finishes, the folder moves to `90-archive/projects/{project}/`.
 

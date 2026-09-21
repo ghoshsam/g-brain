@@ -55,7 +55,7 @@ You can change your mind later. Switching means copying a different list over
 | Folder | What goes in it | An example |
 |---|---|---|
 | `00-inbox/` | Anything the AI could not confidently place, with a one-line reason | `00-inbox/something-a-customer-said.md` |
-| `05-memory/` | How you work. Things the AI should apply without being told | `05-memory/build-and-test.md` |
+| `05-memory/` | How you work everywhere. Things the AI should apply whatever it is working on | `05-memory/git-hygiene.md` |
 | `10-knowledge/{topic}/` | Explanations that outlive any one project | `10-knowledge/auth/oidc-token-refresh.md` |
 | `20-projects/{project}/` | Anything tied to one piece of work you are doing now | `20-projects/billing-rewrite/open-questions.md` |
 | `30-people/` | Who does what, and how to work with them | `30-people/platform-team.md` |
@@ -66,6 +66,72 @@ You can change your mind later. Switching means copying a different list over
 
 The numbers go up in tens on purpose. That leaves gaps. You can add a folder
 later without renumbering anything.
+
+---
+
+## Rules about one project live with that project
+
+Some rules are true whatever you are doing. *Never commit unless I ask.* Those
+go in `05-memory/`.
+
+Other rules are only true of one job. *On the billing rewrite, run the tests
+before you push.* That one is not true everywhere, so it does not belong in
+`05-memory/`. It goes inside the project it is about:
+
+```
+20-projects/billing-rewrite/memory/running-the-tests.md
+```
+
+Two reasons this is worth the extra folder.
+
+**Your AI reads `05-memory/` at the start of every session.** Every line in there
+costs you. Rules about a project you are not touching today are noise.
+
+**When the project ends, the whole folder moves to the archive.** Its rules go
+with it. There is nothing left behind to clean up.
+
+The quick test: if you are about to name a memory note after a project, it
+belongs in that project.
+
+One thing to expect. A `memory/` folder inside a project is a folder your main
+list does not name, so `gbrain doctor` will report it as drift. Nothing stops
+working — drift is only a note. To settle it, give that project a list of its
+own.
+
+---
+
+## A project can have its own folder list
+
+Most projects never need one. Notes sit loose in the project folder, the list at
+the top of your brain covers them, and that is fine. It is the normal case, not
+something you forgot to do.
+
+Sometimes one project gets big enough to want folders of its own — `memory/`,
+`decisions/`, `research/`. When that happens, put a second `content-structure.md`
+inside the project folder and describe them there:
+
+```
+20-projects/billing-rewrite/content-structure.md
+```
+
+From then on, that file decides what goes where **inside that project**. The list
+at the top of your brain still decides what counts as a project in the first
+place. The two do not compete: one covers the brain, the other covers one folder
+in it.
+
+Three things worth knowing:
+
+- **It is optional, and reversible.** Delete the file and the project goes back
+  to being covered by the main list. Nothing moves and nothing breaks.
+- **Your AI can read one project's list on its own**, without pulling in the
+  whole brain's.
+- **`gbrain doctor` checks each project against whichever list covers it** — the
+  project's own where there is one, the main list where there is not. A note
+  sitting straight in the project folder is never counted as drift.
+
+Write it the same way as the main list: what belongs, what does not, and where
+those things go instead. It can be much shorter. It only has to cover one
+project.
 
 ---
 
@@ -177,7 +243,7 @@ your AI would otherwise spend on the actual task.
 |---|---|
 | `personal.md` | 125 |
 | `product-team.md` | 209 |
-| `default.md` | 288 |
+| `default.md` | 322 |
 | About as long as you should go | 400 |
 
 Past roughly 400 lines, the "how to choose" steps at the top sit so far from the
@@ -187,6 +253,9 @@ short one saying the same thing.
 So spend the space on exclusions. If you need to cut, cut in this order: extra
 examples, then explanations of why the convention exists, then folders nobody
 uses, then optional frontmatter fields nobody fills in.
+
+A project's own list has the same budget, and your AI may well read both in one
+session. Keep it to the folders that project actually has.
 
 ---
 

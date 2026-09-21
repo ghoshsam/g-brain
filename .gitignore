@@ -6,3 +6,7 @@ coverage/
 .env
 .env.local
 .DS_Store
+
+# Next.js
+.next/
+next-env.d.ts

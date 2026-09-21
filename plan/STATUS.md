@@ -1,6 +1,6 @@
 # Status
 
-**Last updated:** 2026-09-18 · **Current phase:** 0-8 complete. v1 is built
+**Last updated:** 2026-09-19 · **Current phase:** 0-8 complete. v1 is built; phase 9 is planned
 
 > New to this project? Read [`DEVELOPMENT-PLAN.md`](./DEVELOPMENT-PLAN.md)
 > first — it is the plain-English version of everything here.
@@ -239,6 +239,29 @@ control rather than a described one.
 Also fixed here: `createSearchPort` had no `close()`, so a chokidar watcher
 outlived its server and kept a handle on a directory that had been deleted.
 Found because vitest reported `EPERM` after every test passed.
+
+## Phase 9 — planned, nothing built
+
+Two ADRs accepted on 2026-09-19 opened a phase that has not started:
+[ADR-0008](../docs/technical/12-adr/0008-project-scope-is-the-project-folder.md)
+makes `20-projects/{project}/` the access boundary, and
+[ADR-0009](../docs/technical/12-adr/0009-read-only-web-ui.md) adds a read-only
+web UI with no identity system.
+
+[`phases/09-project-scoping-and-ui.md`](./phases/09-project-scoping-and-ui.md)
+records what it delivers: a `project` code on the tools that resolves to the
+project folder, a UI that lists projects and browses one of them, and a project
+list filtered by the caller's read scopes — a project the caller cannot read is
+absent from it, not disabled.
+
+It is small because **project scoping needs no new authorisation code**. The
+per-folder `Scope { folder, read, write }` that phase 3 shipped and phase 4
+proved over HTTP is the whole mechanism; the project code is sugar over the
+`folder` argument. The UI is a view over `brain_tree`, `brain_list`,
+`brain_read` and `brain_search`, and it never writes.
+
+Not decided here: what the UI is built with, whether it is served alongside the
+HTTP transport, and whether search crosses projects.
 
 ## What is left
 

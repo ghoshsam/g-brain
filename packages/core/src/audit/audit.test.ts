@@ -22,6 +22,7 @@ const config = (brainRoot: string, overrides: Partial<BrainConfig> = {}): BrainC
   duplicateThreshold: 0.9,
   searchMode: 'lexical',
   sessionExpiryDays: 90,
+  projectsFolder: '20-projects',
   ...overrides,
 })
 

@@ -46,6 +46,7 @@ const schema = z.object({
   DUPLICATE_THRESHOLD: fraction.optional(),
   SEARCH_MODE: z.literal('lexical', { message: 'must be lexical — the only v1 value' }).optional(),
   SESSION_EXPIRY_DAYS: whole(1, 36_500).optional(),
+  PROJECTS_FOLDER: z.string().trim().min(1, 'must not be blank').optional(),
 })
 
 // Blank and unset mean the same thing: fall back to the default. Dropping them
@@ -121,6 +122,7 @@ export function loadConfig(env: NodeJS.ProcessEnv): BrainConfig {
     duplicateThreshold: raw.DUPLICATE_THRESHOLD ?? 0.9,
     searchMode: raw.SEARCH_MODE ?? 'lexical',
     sessionExpiryDays: raw.SESSION_EXPIRY_DAYS ?? 90,
+    projectsFolder: (raw.PROJECTS_FOLDER ?? '20-projects').replace(/\/+$/, ''),
   })
 }
 

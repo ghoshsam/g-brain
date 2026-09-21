@@ -53,8 +53,55 @@ type Action = AuditEntry['action']
 
 // --- reads ------------------------------------------------------------------
 
-export async function getStructure(ctx: BrainContext): Promise<Result<StructureResult>> {
-  return await readStructure(ctx)
+export async function getStructure(
+  ctx: BrainContext,
+  options: { project?: string } = {},
+): Promise<Result<StructureResult>> {
+  return await readStructure(ctx, options)
+}
+
+export interface ProjectSummary {
+  /** The directory name under the projects folder, which is also the project code. */
+  project: string
+  docCount: number
+  /**
+   * Repositories this project maps to, from `repos:` on the project README.
+   * Shown, never consulted for access — frontmatter is agent-written and
+   * unenforced, so deciding on it would be the bypass ADR-0008 prevents.
+   */
+  repos?: string[]
+}
+
+export async function listProjects(ctx: BrainContext): Promise<Result<ProjectSummary[]>> {
+  const tree = await readTree(ctx)
+  if (!tree.ok) return tree
+
+  // The tree is already pruned to what this actor may read, so an unreadable
+  // project is absent here rather than listed and withheld.
+  const base = ctx.config.projectsFolder
+  const folder = tree.value.find((node) => node.path === base)
+  if (folder === undefined) return ok([])
+
+  const summaries: ProjectSummary[] = []
+  for (const child of folder.children) {
+    summaries.push({
+      project: child.path.slice(base.length + 1),
+      docCount: child.docCount,
+      ...fieldIf('repos', await linkedRepos(ctx, child.path)),
+    })
+  }
+  return ok(summaries)
+}
+
+async function linkedRepos(ctx: BrainContext, folder: string): Promise<string[] | undefined> {
+  const path = containPath(ctx, `${folder}/README.md`)
+  if (!path.ok) return undefined
+
+  const raw = await readRaw(ctx, path.value)
+  if (!raw.ok) return undefined
+
+  const { doc } = parseDoc(path.value, raw.value.content, raw.value.etag)
+  return doc.meta.repos === undefined || doc.meta.repos.length === 0 ? undefined : doc.meta.repos
 }
 
 export async function getTree(ctx: BrainContext): Promise<Result<FolderNode[]>> {

@@ -226,6 +226,142 @@ a transport that did not exist; written now it is shaped by one.
 
 ---
 
+## 2026-09-19 — A project is a folder, and that folder is the access boundary
+
+**Raised by the repo owner:** project-level access inside one brain. That is the
+reconsider trigger both ADR-0005 and the out-of-scope document already named —
+one brain has always been one access boundary.
+
+The obvious implementation is to scope on the `project:` frontmatter field,
+since that is already what groups content across folders. It is an authorisation
+bypass. Frontmatter is linted, never enforced (ADR-0002), so an agent can write
+`project: finance` into a document body and grant itself access, or mislabel a
+document to hide it from a reader. It also inverts the write path, since
+authorisation would have to parse agent-supplied content before deciding whether
+the agent may write it.
+
+**Authorisation may depend only on inputs the caller cannot author.** The path is
+such an input; the document body is not.
+
+So a project *is* the folder `20-projects/{project}/`, tools take a `project`
+code that resolves to it, and authorisation is the per-folder
+`Scope { folder, read, write }` that `core/auth` already applies to every
+operation. **Zero new authorisation code**, which is the point rather than a
+side effect: the mechanism protecting projects is the one already covered by
+tests.
+
+**An enforced manifest in `.brain/` was designed first, and then rejected.** It
+mapped path globs to projects, was unwritable through any operation, and it was
+safe — it was the original recommendation. Dropped as unnecessary complexity: a
+second source of truth about where content lives, a maintenance surface, and a
+decision about what happens to documents nothing has mapped yet, all to express
+a grouping **the filesystem already expresses**. If the answer is a folder, use
+the folder.
+
+The cost lands as a filing rule, not a code rule. `10-knowledge/` and
+`40-decisions/` stay team-wide, so content that must not cross a project
+boundary lives in the project folder — and promoting a finding out of a project,
+the habit the content model pushes hardest, now also widens who can read it.
+That belongs in `content-structure.md` as prose, which is ADR-0001 working as
+intended.
+
+→ ADR-0008.
+
+---
+
+## 2026-09-19 — A read-only web UI, and no identity system
+
+A team wants to see what is in a brain without running an MCP client. Reading it
+as a git repo works and stays supported, but it shows the whole repository or
+nothing — there is no view that opens at "the projects I can see" and lets
+someone walk one of them.
+
+What ships is a read-only surface: list projects, select one, browse its real
+folder tree, read a document. **It never writes** — no create, edit, delete or
+move — so the non-goals about a wiki and about realtime collaboration both stay
+true as written. It is a third thin surface over `core` alongside `apps/mcp` and
+`apps/cli`, so the existing architecture tests apply to it unchanged.
+
+**It introduces no notion of a user.** It is a caller like any other, carrying
+whatever the existing model already gives it: the local actor where
+`AUTH_REQUIRED` is false, or a bearer key on HTTP. The `recall` profile from
+ADR-0007 is exactly the right shape for a browser — read everywhere, write
+nowhere. The project list is directories under `20-projects/` filtered by the
+caller's read scopes, and a project the caller cannot read is **absent, not
+greyed out**, because naming a folder somebody may not see leaks the shape of
+the brain.
+
+**OIDC identity was considered and deferred on size, not on merit.** It is the
+right answer once more than a handful of people need different project access,
+and it is what would make the audit log name a person. It is also a new
+subsystem — provider configuration, sessions, token refresh, a login surface,
+and one more thing that can be down between a team and their notes — in service
+of a browser for markdown files. The seam is the `Actor` that `core/auth`
+already evaluates, so adding it later changes only how an `Actor` is resolved,
+not the UI, the tools, or the authorisation model.
+
+**The accepted cost is that access is per key, not per person.** Two people
+sharing a key are indistinguishable, revoking one person's access means rotating
+a key others may hold, and giving one person one project means issuing and
+distributing a scoped key by hand. Workable for a handful of people, and it does
+not stay workable.
+
+→ ADR-0009.
+
+---
+
+## 2026-09-19 — Memory splits by reach, and a project may carry its own convention
+
+Two changes to the content model, made together because they are the same idea
+applied twice: a rule or a convention belongs where the thing it describes lives.
+
+**`05-memory/` now holds only what is true everywhere** — what an agent should
+apply whatever it is working on. A rule true of one project moves to
+`20-projects/{project}/memory/`. The project folder is already the access
+boundary (ADR-0008), so a scope granted on a project now covers the rules for
+working on it, instead of needing a second scope on a slice of `05-memory/` that
+scopes cannot express. It also means the rules leave with the project when the
+folder is archived, rather than outliving the work they described. The rule of
+thumb is written into the preset: if you are about to name a memory file after a
+project, it belongs in that project.
+
+**A project may put a `content-structure.md` in its own folder**, and where it
+does, that document is the authority for everything inside that project. The
+root document still decides what belongs in `20-projects/` at all — the
+project's is additive, never a replacement. It is optional, and a project
+without one behaves exactly as before: flat files, root convention governs.
+`brain_structure` takes an optional project argument returning that project's
+document and its subtree; `FORBIDDEN` if the caller cannot read the project,
+checked before existence so an out-of-scope project cannot be told apart from a
+missing one, and `NOT_FOUND` otherwise.
+
+**Why the root document could not do this:** it describes the brain's folders,
+and `20-projects/{project}/` is as deep as it can usefully go. It cannot say
+what a particular project's subfolders mean without naming every project in a
+document every agent reads on every routing decision. The practical
+consequence before this change was that **every subfolder of every project was
+drift** — the root document declared the project folder and nothing below it, so
+`memory/`, `decisions/` and `research/` all filed as undeclared. Drift only
+reports, so nothing was lost, but a drift signal that fires on correct filing is
+a signal people learn to ignore. Drift is now measured against whichever
+convention governs the folder, and a document sitting directly in the project
+folder is never drift.
+
+**The cost, stated plainly.** There are now two places to look for a rule, and
+"is this global or is it this project's?" is a judgement an agent has to make
+every time it writes one — it will sometimes get it wrong, and a rule filed in
+the wrong half is a rule that does not get applied. Filing anywhere inside a
+project now means reading two documents instead of one, which is one more call
+and more tokens before the first write. Both are accepted because the
+alternative — one flat memory folder and one convention for every project — was
+already producing false drift on correct filing, and does not survive a brain
+with more than a handful of projects.
+
+Nothing enforces any of this. Both changes are prose in `content-structure.md`
+and a choice of which document to read, which is ADR-0001 working as intended.
+
+---
+
 ## Open, to settle during the build
 
 - **`60-sessions/` expiry** — archive or delete. Leaning archive; deletion is
